@@ -3,16 +3,9 @@ import { createUserInput, loginUserInput } from "../schema/auth.schema";
 import { createUser, findUser, findUserWithToken } from "../service/auth.service";
 import admin_list from "../config/admin_list";
 import { NotFoundError, UnauthorizedError, ForbiddenError } from "../errors";
-import jwt, { DecodeOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
-import { User } from "../models/user.model";
-import mongoose from "mongoose";
-
-interface DecodedToken extends DecodeOptions {
-    email: string;
-    id: mongoose.Types.ObjectId;
-    roles: number[];
-}
+import { DecodedToken } from '../utils/interfaces'
 
 export const registerController = async (req: Request<{}, {}, createUserInput['body']>, res: Response) => {
     try {
