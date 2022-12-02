@@ -3,12 +3,12 @@ import { createUserInput, loginUserInput } from "../schema/auth.schema";
 import { createUser, findUser, findUserWithToken } from "../service/auth.service";
 import admin_list from "../config/admin_list";
 import { NotFoundError, UnauthorizedError, ForbiddenError } from "../errors";
-import jwt from 'jsonwebtoken';
+import jwt, { DecodeOptions } from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { User } from "../models/user.model";
 import mongoose from "mongoose";
 
-interface DecodedToken {
+interface DecodedToken extends DecodeOptions {
     email: string;
     id: mongoose.Types.ObjectId;
     roles: number[];
@@ -53,7 +53,7 @@ export const loginController = async (req: Request<{}, {}, loginUserInput['body'
                     roles: roles
                 }
             },
-            process.env.ACCESS_TOKEN_SECRET,
+            process.env.ACCESS_TOKEN_SECRET as string,
             { expiresIn: '15m' }
         )
 
@@ -61,7 +61,7 @@ export const loginController = async (req: Request<{}, {}, loginUserInput['body'
             {
                 email: user.email
             },
-            process.env.REFRESH_TOKEN_SECRET,
+            process.env.REFRESH_TOKEN_SECRET as string,
             { expiresIn: '1d' }
         )
 
@@ -127,13 +127,14 @@ export const refreshTokenController = async (req: Request<{}, {}, {}>, res: Resp
         
         jwt.verify(
             refreshToken,
-            process.env.REFRESH_TOKEN_SECRET,
-            async (err: any, data: DecodedToken) => {
+            process.env.REFRESH_TOKEN_SECRET as string,
+            {},
+            async (err: any, data) => {
                 if (err) {
                     throw new ForbiddenError('bad token for reuse')
                 }
-
-                const user = await findUser(data?.email)
+                let decodedData = data as DecodedToken
+                const user = await findUser(decodedData?.email)
                 
                 if (user) {
                     user.refreshToken = []
@@ -148,13 +149,15 @@ export const refreshTokenController = async (req: Request<{}, {}, {}>, res: Resp
 
     jwt.verify(
         refreshToken,
-        process.env.REFRESH_TOKEN_SECRET,
-        async (err: any, data: DecodedToken) => {
+        process.env.REFRESH_TOKEN_SECRET as string,
+        {},
+        async (err: any, data) => {
             if (err) {
                 user.refreshToken = [...newRefreshTokenArray]
-                const result =  await user.save()
+                const result = await user.save()
             }
-            if (err || data.email !== user.email) {
+            let decodedData = data as DecodedToken
+            if (err || decodedData.email !== user.email) {
                 throw new ForbiddenError('Bad Token')
             }
 
@@ -168,7 +171,7 @@ export const refreshTokenController = async (req: Request<{}, {}, {}>, res: Resp
                         roles: roles
                     }
                 },
-                process.env.ACCESS_TOKEN_SECRET,
+                process.env.ACCESS_TOKEN_SECRET as string,
                 { expiresIn: '1d' }
             )
 
@@ -176,7 +179,7 @@ export const refreshTokenController = async (req: Request<{}, {}, {}>, res: Resp
                 {
                     email: user.email
                 },
-                process.env.REFRESH_TOKEN_SECRET,
+                process.env.REFRESH_TOKEN_SECRET as string,
                 { expiresIn: '1d' }
             )
             

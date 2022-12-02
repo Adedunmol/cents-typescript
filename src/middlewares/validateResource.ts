@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AnyZodObject } from "zod";
 import { StatusCodes } from "http-status-codes";
 
-export const validateResource = (schema: AnyZodObject) => {
+const validateResource = (schema: AnyZodObject) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
             schema.parse({
@@ -15,3 +15,5 @@ export const validateResource = (schema: AnyZodObject) => {
     
     }
 }
+
+export default validateResource;

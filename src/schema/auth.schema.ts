@@ -1,4 +1,4 @@
-import { object, string, TypeOf, boolean, number } from 'zod';
+import { object, string, TypeOf, number } from 'zod';
 
 export const createUserSchema = object({
     body: object({
