@@ -7,7 +7,7 @@ interface Service {
     paid: boolean
 }
 
-interface InvoiceDocument extends Document {
+export interface InvoiceDocument extends Document {
     clientFullName: string;
     clientEmail: string;
     clientPhoneNumber: string;
