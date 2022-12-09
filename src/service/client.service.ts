@@ -1,4 +1,4 @@
-import { DocumentDefinition, FilterQuery } from "mongoose";
+import { DocumentDefinition, FilterQuery, UpdateQuery } from "mongoose";
 import { Client, ClientDocument } from "../models/client.model";
 import { Invoice } from "../models/invoice.model";
 
@@ -25,4 +25,8 @@ export const deleteInvoices = async (query: FilterQuery<ClientDocument>) => {
 
 export const deleteClient = async (query: FilterQuery<ClientDocument>) => {
     return await Client.findOneAndDelete(query)
+}
+
+export const updateClient = async (query: FilterQuery<ClientDocument>, update: UpdateQuery<ClientDocument>) => {
+    return await Client.updateMany(query, update, { new: true, runValidators: true })
 }

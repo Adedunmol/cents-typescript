@@ -1,15 +1,12 @@
 import { Request, Response } from "express"
-import { InvoiceDocument } from "../models/invoice.model"
 import { clientInput, updateClientInput } from "../schema/client.schema"
-import { getAllClients, getClient, createClient, deleteInvoices, deleteClient } from "../service/client.service"
-
-const { StatusCodes } = require('http-status-codes')
-const { UnauthorizedError, BadRequestError } = require('../errors')
-const Client = require('../models/Client')
-const Invoice = require('../models/Invoice')
+import { getAllClients, getClient, createClient, deleteInvoices, deleteClient, updateClient } from "../service/client.service"
+import { StatusCodes } from 'http-status-codes'
+import { BadRequestError } from '../errors'
+import { Invoice } from '../models/invoice.model'
 
 
-const getAllClientsController = async (req: Request, res: Response) => {
+export const getAllClientsController = async (req: Request, res: Response) => {
     const createdBy = req.user.id
 
     const clients = await getAllClients({ createdBy })
@@ -18,7 +15,7 @@ const getAllClientsController = async (req: Request, res: Response) => {
 }
 
 
-const getClientController = async (req: Request, res: Response) => {
+export const getClientController = async (req: Request, res: Response) => {
     const createdBy = req.user.id
     const { id: clientID } = req.params
 
@@ -32,7 +29,7 @@ const getClientController = async (req: Request, res: Response) => {
 }
 
 
-const createClientController = async (req: Request<{}, {}, clientInput['body']>, res: Response) => {
+export const createClientController = async (req: Request<{}, {}, clientInput['body']>, res: Response) => {
     const createdBy = req.user.id
 
     const clientObj = { ...req.body, createdBy }
@@ -43,7 +40,7 @@ const createClientController = async (req: Request<{}, {}, clientInput['body']>,
 }
 
 
-const deleteClientController = async (req: Request, res: Response) => {
+export const deleteClientController = async (req: Request, res: Response) => {
     const createdBy = req.user.id
     const { id: clientID } = req.params
 
@@ -64,7 +61,7 @@ const deleteClientController = async (req: Request, res: Response) => {
 }
 
 
-const updateClientController = async (req: Request<{ id: string }, {}, updateClientInput['body']>, res: Response) => {
+export const updateClientController = async (req: Request<{ id: string }, {}, updateClientInput['body']>, res: Response) => {
     const createdBy = req.user.id
     const { id: clientID } = req.params
 
@@ -78,25 +75,8 @@ const updateClientController = async (req: Request<{ id: string }, {}, updateCli
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'No client with this Id' })
     }
 
-    const invoices = await Invoice.find({ createdFor: clientID, createdBy }).exec()
+    const invoices = await Invoice.updateMany({ createdFor: clientID, createdBy }, { clientFullName: req.body.fullName, email: req.body.email, phoneNumber: req.body.phoneNumber })
+    const updatedClient = await updateClient({ createdBy, _id: clientID }, { email: req.body.email, phoneNumber: req.body.phoneNumber, clientFullName: req.body.fullName })
 
-    const newInvoices = invoices.forEach((invoice: InvoiceDocument) => {
-        invoice.clientFullName = req.body.fullName || client.fullName
-        invoice.clientEmail = req.body.email || client.email
-        invoice.clientPhoneNumber = req.body.phoneNumber || client.phoneNumber
-    })
-    
-    client.fullName = req.body.fullName || client.fullName
-    client.email = req.body.email || client.email
-    client.phoneNumber = req.body.phoneNumber || client.phoneNumber
-
-    const clientResult = await client.save()
-
-    if (!newInvoices) {
-        //there are no invoices associated with the client 
-    }else {
-        const invoiceResult = await newInvoices.save()
-    }
-
-    return res.status(StatusCodes.OK).json({ client: clientResult })
+    return res.status(StatusCodes.OK).json({ client: updatedClient })
 }

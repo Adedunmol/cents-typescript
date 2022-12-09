@@ -4,7 +4,7 @@ interface Service {
     item: string;
     rate: number;
     hours: number;
-    paid: boolean
+    paid: boolean;
 }
 
 export interface InvoiceDocument extends Document {
