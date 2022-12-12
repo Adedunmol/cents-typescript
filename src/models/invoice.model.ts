@@ -1,4 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
+import mongoose, { Document, model, Schema } from "mongoose";
+import { zonedTimeToUtc } from 'date-fns-tz'
 
 interface Service {
     item: string;
@@ -13,7 +14,7 @@ export interface InvoiceDocument extends Document {
     clientPhoneNumber: string;
     services: Service[];
     total: number;
-    dueDate: Date;
+    dueDate: Date | string;
     fullyPaid: boolean;
     createdBy: mongoose.Types.ObjectId;
     createdFor: mongoose.Types.ObjectId;
@@ -63,6 +64,14 @@ const invoiceSchema = new Schema({
 
 }, {
     timestamps: true
+})
+
+invoiceSchema.pre('save', async function () {
+    const user = this as InvoiceDocument
+    
+    if (user.isModified('dueDate')) {
+        user.dueDate = zonedTimeToUtc(new Date(), 'UTC')
+    }
 })
 
 export const Invoice = model<InvoiceDocument>('Invoice', invoiceSchema)

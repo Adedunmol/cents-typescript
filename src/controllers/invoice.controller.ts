@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import fs from 'fs'
+import mongoose from 'mongoose'
 import { invoiceInput } from '../schema/invoice.schema'
 import { getClient } from '../service/client.service'
 import { createInvoice } from '../service/invoice.service'
@@ -11,7 +12,7 @@ const { StatusCodes } = require('http-status-codes')
 const path = require('path')
 const sendMail = require('../config/mail')
 const emailJobEvents = require('../events')
-const generateInvoice = require('../utils/generateInvoice')
+import generateInvoice from '../utils/generateInvoice'
 const { dateDiffInDays, findSecondsDifference } = require('../utils/differenceInDates')
 //const schedule = require('../jobs/schedulers/schedule')
 //const mailScheduleOnDueDate = require('../events/reminderMail')
@@ -149,10 +150,10 @@ const updateInvoice = async (req: Request, res: Response) => {
 }
 
 
-const sendInvoiceToClient = async (req: Request, res: Response) => {
+const sendInvoiceToClient = async (req: Request<{ id: string }>, res: Response) => {
     const { id: invoiceId } = req.params
 
-    if (!clientId) {
+    if (!invoiceId) {
         throw new BadRequestError('No invoice id with url')
     }
 
@@ -173,7 +174,7 @@ const sendInvoiceToClient = async (req: Request, res: Response) => {
     await sendMail(invoice.clientEmail, subject, text, html, invoice)
 
     //delete the invoice from the invoices directory
-    fs.unlink(path.join(__dirname, '..', 'invoices', `${String(invoice._id)}.pdf`), (err) => {
+    fs.unlink(path.join(__dirname, '..', 'invoices', `${String(invoice._id)}.pdf`), (err: any) => {
         if (err) throw new Error(err)
     })
 
