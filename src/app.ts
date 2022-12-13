@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { mailSendingQueue } from './jobs';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './config/connect-db';
 import authRouter from './routes/auth.route';
