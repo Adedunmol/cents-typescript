@@ -1,11 +1,12 @@
 import Queue from 'bull'
 import { DocumentDefinition } from 'mongoose'
 import { InvoiceDocument } from '../models/invoice.model'
-import { emailDueDateProcess } from './consumers'
+import { emailDueDateProcess, reminderEmailAfterDueDateProcess } from './consumers'
 
 export const mailSendingQueue = new Queue('mail sending', '127.0.0.1:6379')
 
 mailSendingQueue.process('dueDate', emailDueDateProcess)
+mailSendingQueue.process('recurrentAfterDueDate', reminderEmailAfterDueDateProcess)
 
 export const sendMailOnDueDate = async (invoice: DocumentDefinition<InvoiceDocument>) => {
     // confirm this is correct
