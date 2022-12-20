@@ -8,7 +8,7 @@ const oAuth2Client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID, proces
 
 oAuth2Client.setCredentials({refresh_token: process.env.GOOGLE_REFRESH_TOKEN})
 
-export const sendMail = async (to: string, subject: string, text: string, html: string, invoice: DocumentDefinition<InvoiceDocument>) => {
+const sendMail = async (to: string, subject: string, text: string, html: string, invoice: DocumentDefinition<InvoiceDocument>) => {
     
     const transport = nodemailer.createTransport({
         service: 'gmail',
@@ -34,3 +34,5 @@ export const sendMail = async (to: string, subject: string, text: string, html: 
     const result = await transport.sendMail(mailOptions)
     
 }
+
+export default sendMail;

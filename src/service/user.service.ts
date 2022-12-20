@@ -1,5 +1,5 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
-import { User, UserDocument } from "../models/user.model";
+import User, { UserDocument } from "../models/user.model";
 
 
 export const findUserAndUpdate = async (query: FilterQuery<UserDocument>, update: UpdateQuery<UserDocument>) => {

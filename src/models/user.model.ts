@@ -62,4 +62,6 @@ userSchema.pre('save', async function (next: any) {
     return next()
 })
 
-export const User = model<UserDocument>('User', userSchema)
+const User = model<UserDocument>('User', userSchema)
+
+export default User;

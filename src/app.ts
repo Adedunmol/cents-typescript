@@ -1,18 +1,18 @@
 import express, { Request, Response } from 'express';
-import { mailSendingQueue, sendMailOnDueDate, sendMailsAfterDueDate } from './jobs';
+import helmet from 'helmet';
+import rateLimiter from 'express-rate-limit';
+import cors from 'cors';
+import { sendMailOnDueDate, sendMailsAfterDueDate } from './jobs';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './config/connect-db';
 import authRouter from './routes/auth.route';
 import { routeNotFound } from './middlewares/route-not-found';
 import { errorHandler } from './middlewares/error-handler';
 import emailJobEvents from './events/'
-import { DocumentDefinition } from 'mongoose';
-import { InvoiceDocument } from './models/invoice.model';
+import { emailData } from './utils/interfaces'
 
-interface emailData {
-    invoice: DocumentDefinition<InvoiceDocument>;
-    dueDate: Date;
-}
+const app = express()
+
 
 emailJobEvents.on('send-reminder-mails', async (data: emailData) => {
     await sendMailsAfterDueDate(data.invoice)
@@ -24,8 +24,12 @@ emailJobEvents.on('dueMail', async (data: emailData) => {
 })
 
 
+app.set('emailJobEvents', emailJobEvents)
 
-const app = express()
+app.use(cookieParser())
+app.use(helmet())
+app.use(cors())
+
 
 connectDB(process.env.DATABASE_URI as string)
 

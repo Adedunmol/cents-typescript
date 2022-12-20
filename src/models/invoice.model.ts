@@ -74,4 +74,6 @@ invoiceSchema.pre('save', async function () {
     }
 })
 
-export const Invoice = model<InvoiceDocument>('Invoice', invoiceSchema)
+const Invoice = model<InvoiceDocument>('Invoice', invoiceSchema)
+
+export default Invoice;

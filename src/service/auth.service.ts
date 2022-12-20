@@ -1,5 +1,5 @@
 import { DocumentDefinition } from 'mongoose';
-import { User, UserDocument } from '../models/user.model';
+import User, { UserDocument } from '../models/user.model';
 
 export const createUser = async (input: DocumentDefinition<Omit<UserDocument, 'comparePassword' |'refreshToken' | 'createdAt' | 'updatedAt'>>) => {
     try {

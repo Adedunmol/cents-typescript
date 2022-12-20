@@ -102,7 +102,7 @@ export const logoutController = async (req: Request, res: Response) => {
 }
 
 
-export const refreshTokenController = async (req: Request<{}, {}, {}>, res: Response) => {
+export const refreshTokenController = async (req: Request, res: Response) => {
     const cookie = req.cookies
     
 

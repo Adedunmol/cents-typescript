@@ -1,6 +1,6 @@
 import { DocumentDefinition, FilterQuery, UpdateQuery } from "mongoose";
-import { Client, ClientDocument } from "../models/client.model";
-import { Invoice } from "../models/invoice.model";
+import Client, { ClientDocument } from "../models/client.model";
+import Invoice from "../models/invoice.model";
 
 
 export const getAllClients = async (query: FilterQuery<ClientDocument>) => {
