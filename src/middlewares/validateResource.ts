@@ -10,7 +10,7 @@ const validateResource = (schema: AnyZodObject) => {
             })
             next()
         }catch (err: any) {
-            return res.status(StatusCodes.BAD_REQUEST).send(err.error.issues)
+            return res.status(StatusCodes.BAD_REQUEST).send(err.issues)
         }
     
     }

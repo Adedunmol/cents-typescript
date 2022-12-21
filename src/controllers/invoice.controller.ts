@@ -11,10 +11,6 @@ import sendMail from '../utils/mail'
 import generateInvoice from '../utils/generateInvoice'
 import { NotFoundError } from '../errors'
 import { findUser } from '../service/auth.service'
-const { dateDiffInDays, findSecondsDifference } = require('../utils/differenceInDates')
-//const schedule = require('../jobs/schedulers/schedule')
-//const mailScheduleOnDueDate = require('../events/reminderMail')
-
 
 export const createInvoiceController = async (req: Request<{ id: string }, {}, invoiceInput['body']>, res: Response) => {
     const emailJobEvents = req.app.get('emailJobEvents')

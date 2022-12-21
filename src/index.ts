@@ -1,3 +1,4 @@
+require('express-async-errors')
 require('dotenv').config()
 import app from "./app";
 import mongoose from "mongoose";

@@ -8,21 +8,17 @@ import { StatusCodes } from 'http-status-codes';
 import { DecodedToken } from '../utils/interfaces'
 
 export const registerController = async (req: Request<{}, {}, createUserInput['body']>, res: Response) => {
-    try {
-        if (admin_list.has(req.body.email)) {
-            req.body.roles = {
-                Admin: 3001,
-                User: 1984,
-                Moderator: 2150
-            }
+    if (admin_list.has(req.body.email)) {
+        req.body.roles = {
+            Admin: 3001,
+            User: 1984,
+            Moderator: 2150
         }
-
-        const user = await createUser(req.body)
-
-        return user
-    }catch (err: any) {
-        return res.send(err)
     }
+    
+    const user = await createUser(req.body)
+
+    return res.status(StatusCodes.CREATED).json({ user })
 }
 
 export const loginController = async (req: Request<{}, {}, loginUserInput['body']>, res: Response) => {

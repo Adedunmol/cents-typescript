@@ -1,4 +1,4 @@
-import { Errback, NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from 'http-status-codes';
 
 export const errorHandler = async (err: any, req: Request, res: Response, next: NextFunction) => {
