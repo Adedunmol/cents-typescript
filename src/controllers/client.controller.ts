@@ -3,7 +3,7 @@ import { clientInput, updateClientInput } from "../schema/client.schema"
 import { getAllClients, getClient, createClient, deleteInvoices, deleteClient, updateClient } from "../service/client.service"
 import { StatusCodes } from 'http-status-codes'
 import { BadRequestError } from '../errors'
-import { Invoice } from '../models/invoice.model'
+import Invoice from '../models/invoice.model'
 
 
 export const getAllClientsController = async (req: Request, res: Response) => {

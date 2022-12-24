@@ -1,4 +1,5 @@
 import { DocumentDefinition } from 'mongoose';
+import { omit, pick } from 'lodash';
 import { ConflictError } from '../errors';
 import User, { UserDocument } from '../models/user.model';
 
@@ -6,6 +7,7 @@ export const createUser = async (input: DocumentDefinition<Omit<UserDocument, 'c
   
     const user = await User.create(input)
 
+    return pick(user.toJSON(), ['_id', 'email', 'fullName'])
 }
 
 export const findUser = async (email: string) => {

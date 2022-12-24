@@ -1,9 +1,9 @@
 import path from 'path'
 import fs from 'fs'
-import { Invoice } from '../models/invoice.model'
-import { User } from '../models/user.model'
+import Invoice from '../models/invoice.model'
+import User from '../models/user.model'
 import generateInvoice from '../utils/generateInvoice'
-import { sendMail } from '../utils/mail'
+import sendMail from '../utils/mail'
 import { mailSendingQueue } from '.'
 import emailJobEvents from '../events'
 
