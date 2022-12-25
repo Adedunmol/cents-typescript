@@ -4,7 +4,8 @@ import supertest from 'supertest';
 // import { MongoMemoryServer } from 'mongodb-memory-server'
 import app from '../app';
 import mongoose from 'mongoose';
-import formatDistanceStrict from 'date-fns/fp/formatDistanceStrict';
+import User from '../models/user.model';
+import { loginController } from '../controllers/auth.controller';
 
 const userId = new mongoose.Types.ObjectId().toString()
 
@@ -62,6 +63,60 @@ describe('auth', () => {
 
             })
         })
+
+        describe('given the user exists', () => {
+
+            it('should return 409', async () => {
+                const createUserServiceMock = jest
+                    .spyOn(AuthService, 'createUser')
+                    .mockRejectedValue('user exists')
+
+                const { statusCode } = await supertest(app).post('/api/v1/auth/register').send(userInput)
+
+                expect(statusCode).toBe(409)
+
+                expect(createUserServiceMock).toHaveBeenCalled()
+            })
+        })
     })
 
+    describe('login user route', () => {
+
+        describe('given valid details', () => {
+            
+            it('should send a 200', async () => {
+                jest
+                .spyOn(AuthService, 'findUser')
+                // @ts-ignore
+                .mockReturnValue(userPayload)
+
+                jest
+                .spyOn(AuthService, 'validatePassword')
+                // @ts-ignore
+                .mockReturnValue(userPayload)
+
+                const send = jest.fn()
+
+                const req = {
+                    body: { ...userInput }
+                }
+
+                const res = {
+                    send
+                }
+
+                // @ts-ignore
+                await loginController(req, res)
+
+                expect(send).toHaveBeenCalledWith({ accessToken: expect.any(String), expiresIn: expect.any(Number) })
+            })
+        })
+
+        describe('given invalid details', () => {
+
+            it('should send a 401', async () => {
+
+            })
+        })
+    })
 })

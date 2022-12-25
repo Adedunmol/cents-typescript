@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import { createUserInput, loginUserInput } from "../schema/auth.schema";
-import { createUser, findUser, findUserWithToken } from "../service/auth.service";
+import { createUser, findUser, findUserWithToken, validatePassword } from "../service/auth.service";
 import admin_list from "../config/admin_list";
-import { NotFoundError, UnauthorizedError, ForbiddenError } from "../errors";
+import { NotFoundError, UnauthorizedError, ForbiddenError, ConflictError } from "../errors";
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { DecodedToken } from '../utils/interfaces'
 
 export const registerController = async (req: Request<{}, {}, createUserInput['body']>, res: Response) => {
+    try {
     if (admin_list.has(req.body.email)) {
         req.body.roles = {
             Admin: 3001,
@@ -19,19 +20,18 @@ export const registerController = async (req: Request<{}, {}, createUserInput['b
     const user = await createUser(req.body)
 
     return res.status(StatusCodes.CREATED).json({ user })
+    } catch (err: any) {
+        return res.status(409).send('user exists')
+    }
 }
 
 export const loginController = async (req: Request<{}, {}, loginUserInput['body']>, res: Response) => {
     const { email, password } = req.body;
     const cookie = req.cookies;
 
-    const user = await findUser(email)
+    const user = await validatePassword({ email, password })
 
-    if (!user) throw new NotFoundError('No user with this email found')
-
-    const match = await user.comparePassword(password)
-
-    if (match) {
+    if (user) {
         const roles = Object.values(user.roles)
 
         const accessToken = jwt.sign(
