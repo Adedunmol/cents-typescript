@@ -5,7 +5,7 @@ import supertest from 'supertest';
 import app from '../app';
 import mongoose from 'mongoose';
 import User from '../models/user.model';
-import { loginController } from '../controllers/auth.controller';
+import { loginController, logoutController } from '../controllers/auth.controller';
 import { UnauthorizedError } from '../errors';
 
 const userId = new mongoose.Types.ObjectId().toString()
@@ -158,6 +158,37 @@ describe('auth', () => {
                     // @ts-ignore
                     await loginController(req, res) 
                 }).rejects.toBeInstanceOf(UnauthorizedError)
+            })
+        })
+    })
+
+    describe('logout user route', () => {
+
+        describe('given the user is logged in', () => {
+
+            it('should return 204', async () => {
+
+                jest.spyOn(AuthService, 'findUserWithToken')
+                // @ts-ignore
+                .mockReturnValue(userPayload)
+
+                const cookies = jest.fn().mockReturnValue('testingcookie')
+                const clearCookie = jest.fn()
+                const sendStatus = jest.fn()
+
+                const req = {
+                    cookies
+                }
+
+                const res = {
+                    clearCookie,
+                    sendStatus
+                }
+
+                // @ts-ignore
+                const result  = await logoutController(req, res)
+
+                expect(sendStatus).toHaveBeenCalled()
             })
         })
     })
