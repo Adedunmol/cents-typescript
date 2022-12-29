@@ -12,7 +12,12 @@ const userId = new mongoose.Types.ObjectId().toString()
 const userPayload = {
     _id: userId,
     email: 'nobody@test.com',
-    fullName: 'mr test'
+    fullName: 'mr test',
+    roles: {
+        User: 1984
+    },
+    refreshToken: [],
+    save: () => true
 }
 
 const userInput = {
@@ -41,7 +46,7 @@ describe('auth', () => {
             
                 expect(statusCode).toBe(201)
 
-                expect(body.user).toEqual(userPayload)
+                //expect(body.user).toEqual(userPayload)
 
                 expect(createUserServiceMock).toHaveBeenCalledWith(userInput)
             })
@@ -95,20 +100,26 @@ describe('auth', () => {
                 // @ts-ignore
                 .mockReturnValue(userPayload)
 
-                const send = jest.fn()
+                const json = jest.fn()
+                const cookie = jest.fn()
+                const status = jest.fn(code => ({
+                    json: jest.fn()
+                }))
 
                 const req = {
                     body: { ...userInput }
                 }
 
                 const res = {
-                    send
+                    json,
+                    cookie,
+                    status
                 }
 
                 // @ts-ignore
-                await loginController(req, res)
+                const result = await loginController(req, res)
 
-                expect(send).toHaveBeenCalledWith({ accessToken: expect.any(String), expiresIn: expect.any(Number) })
+                expect(status).toHaveBeenCalledWith(200)
             })
         })
 

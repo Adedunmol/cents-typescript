@@ -32,6 +32,7 @@ export const loginController = async (req: Request<{}, {}, loginUserInput['body'
     const user = await validatePassword({ email, password })
 
     if (user) {
+        console.log(user.roles)
         const roles = Object.values(user.roles)
 
         const accessToken = jwt.sign(
