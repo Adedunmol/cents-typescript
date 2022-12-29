@@ -6,6 +6,7 @@ import app from '../app';
 import mongoose from 'mongoose';
 import User from '../models/user.model';
 import { loginController } from '../controllers/auth.controller';
+import { UnauthorizedError } from '../errors';
 
 const userId = new mongoose.Types.ObjectId().toString()
 
@@ -126,7 +127,37 @@ describe('auth', () => {
         describe('given invalid details', () => {
 
             it('should send a 401', async () => {
+                jest
+                .spyOn(AuthService, 'findUser')
+                // @ts-ignore
+                .mockReturnValue(userPayload)
 
+                jest
+                .spyOn(AuthService, 'validatePassword')
+                // @ts-ignore
+                .mockReturnValue(false)
+
+                const json = jest.fn()
+                const cookie = jest.fn()
+                const status = jest.fn()
+
+                const req = {
+                    body: { ...userInput }
+                }
+
+                const res = {
+                    json,
+                    cookie,
+                    status
+                }
+
+                // @ts-ignore
+                //const error = await loginController(req, res)
+
+                await expect(async () => { 
+                    // @ts-ignore
+                    await loginController(req, res) 
+                }).rejects.toBeInstanceOf(UnauthorizedError)
             })
         })
     })
