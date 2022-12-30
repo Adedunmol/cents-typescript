@@ -1,11 +1,11 @@
 require('dotenv').config()
 import * as AuthService from '../service/auth.service'
 import supertest from 'supertest';
-// import { MongoMemoryServer } from 'mongodb-memory-server'
+import jwt from 'jsonwebtoken';
 import app from '../app';
 import mongoose from 'mongoose';
 import User from '../models/user.model';
-import { loginController, logoutController } from '../controllers/auth.controller';
+import { loginController, logoutController, refreshTokenController } from '../controllers/auth.controller';
 import { UnauthorizedError } from '../errors';
 
 const userId = new mongoose.Types.ObjectId().toString()
@@ -189,6 +189,77 @@ describe('auth', () => {
                 const result  = await logoutController(req, res)
 
                 expect(sendStatus).toHaveBeenCalled()
+            })
+        })
+    })
+
+    describe('refresh-token route', () => {
+
+        describe('given the user has cookies', () => {
+
+            it('should return new access token', async () => {
+
+                const refreshToken = jwt.sign({ email: userPayload.email }, process.env.REFRESH_TOKEN_SECRET as string, { expiresIn: '1d' })
+
+                jest.spyOn(AuthService, 'findUserWithToken')
+                // @ts-ignore
+                .mockReturnValue(userPayload)
+
+                const clearCookie = jest.fn()
+                const cookie = jest.fn()
+                const status = jest.fn(() => {
+                    return {
+                        json: jest.fn()
+                    }
+                })
+                const sendStatus = jest.fn()
+
+                const req = {
+                    cookies: {
+                        jwt: refreshToken
+                    }
+                }
+
+                const res = {
+                    clearCookie,
+                    status,
+                    cookie,
+                    sendStatus
+                }
+
+                // @ts-ignore
+                const result = await refreshTokenController(req, res)
+
+                expect(status).toHaveBeenCalledWith(200)
+            })
+        })
+
+        describe('given the user does not have a cookie', () => {
+
+            it('should throw an unauthorized error', () => {
+
+                const clearCookie = jest.fn()
+                const cookie = jest.fn()
+                const status = jest.fn(() => {
+                    return {
+                        json: jest.fn()
+                    }
+                })
+                const sendStatus = jest.fn()
+
+                const req = {
+                    
+                }
+
+                const res = {
+                    clearCookie,
+                    status,
+                    cookie,
+                    sendStatus
+                }
+
+                // @ts-ignore
+                expect(() => refreshTokenController(req, res)).rejects.toThrow()
             })
         })
     })
