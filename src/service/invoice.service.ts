@@ -1,4 +1,4 @@
-import { DocumentDefinition, FilterQuery } from "mongoose";
+import { DocumentDefinition, FilterQuery, UpdateQuery } from "mongoose";
 import Invoice, { InvoiceDocument } from "../models/invoice.model";
 
 
@@ -24,4 +24,8 @@ export const getInvoices = async (query: FilterQuery<InvoiceDocument>) => {
     }catch (err: any) {
         throw new Error(err)
     }
+}
+
+export const updateInvoices = async (query: FilterQuery<InvoiceDocument>, update: UpdateQuery<InvoiceDocument>) => {
+    return await Invoice.updateMany(query, update)
 }

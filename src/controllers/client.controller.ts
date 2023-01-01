@@ -4,6 +4,7 @@ import { getAllClients, getClient, createClient, deleteInvoices, deleteClient, u
 import { StatusCodes } from 'http-status-codes'
 import { BadRequestError } from '../errors'
 import Invoice from '../models/invoice.model'
+import { updateInvoices } from "../service/invoice.service"
 
 
 export const getAllClientsController = async (req: Request, res: Response) => {
@@ -36,7 +37,7 @@ export const createClientController = async (req: Request<{}, {}, clientInput['b
 
     const result = await createClient(clientObj)
 
-    return res.status(StatusCodes.CREATED).json(result)
+    return res.status(StatusCodes.CREATED).json({ client: result })
 }
 
 
@@ -75,7 +76,7 @@ export const updateClientController = async (req: Request<{ id: string }, {}, up
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'No client with this Id' })
     }
 
-    const invoices = await Invoice.updateMany({ createdFor: clientID, createdBy }, { clientFullName: req.body.fullName, email: req.body.email, phoneNumber: req.body.phoneNumber })
+    const invoices = await updateInvoices({ createdFor: clientID, createdBy }, { clientFullName: req.body.fullName, ...req.body })
     const updatedClient = await updateClient({ createdBy, _id: clientID }, { email: req.body.email, phoneNumber: req.body.phoneNumber, clientFullName: req.body.fullName })
 
     return res.status(StatusCodes.OK).json({ client: updatedClient })
