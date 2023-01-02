@@ -3,7 +3,6 @@ import { clientInput, updateClientInput } from "../schema/client.schema"
 import { getAllClients, getClient, createClient, deleteInvoices, deleteClient, updateClient } from "../service/client.service"
 import { StatusCodes } from 'http-status-codes'
 import { BadRequestError } from '../errors'
-import Invoice from '../models/invoice.model'
 import { updateInvoices } from "../service/invoice.service"
 
 
@@ -77,7 +76,7 @@ export const updateClientController = async (req: Request<{ id: string }, {}, up
     }
 
     const invoices = await updateInvoices({ createdFor: clientID, createdBy }, { clientFullName: req.body.fullName, ...req.body })
-    const updatedClient = await updateClient({ createdBy, _id: clientID }, { email: req.body.email, phoneNumber: req.body.phoneNumber, clientFullName: req.body.fullName })
+    const updatedClient = await updateClient({ createdBy, _id: clientID }, { clientFullName: req.body.fullName, ...req.body })
 
     return res.status(StatusCodes.OK).json({ client: updatedClient })
 }

@@ -66,12 +66,12 @@ const invoiceSchema = new Schema({
     timestamps: true
 })
 
+const allServicesPaid =async (currentService: Service) => currentService.paid === true 
+
 invoiceSchema.pre('save', async function () {
     const user = this as InvoiceDocument
     
-    if (user.isModified('dueDate')) {
-        user.dueDate = zonedTimeToUtc(new Date(), 'UTC')
-    }
+    user.fullyPaid = user.services.every(allServicesPaid)
 })
 
 const Invoice = model<InvoiceDocument>('Invoice', invoiceSchema)

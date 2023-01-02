@@ -11,9 +11,9 @@ export const clientSchema = object({
 
 export const updateClientSchema = object({
     body: object({
-        fullName: string(),
-        email: string().email('Should be a valid email'),
-        phoneNumber: string()
+        fullName: string().optional(),
+        email: string().email('Should be a valid email').optional(),
+        phoneNumber: string().optional()
     })
 })
 

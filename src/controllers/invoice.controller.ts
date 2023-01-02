@@ -19,6 +19,7 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
     const createdBy = req.user.id
     const { services, dueDate } = req.body
 
+
     if (!clientId) {
         throw new BadRequestError('ClientId is not included with url')
     }
@@ -42,7 +43,6 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
     }
 
     const invoice = await createInvoice(invoiceObj)
-
     //mailScheduleOnDueDate(invoice, dueDate)
     //schedule.dueDateMail(invoice, dueDate)
     emailJobEvents.emit('dueMail', { invoice, dueDate })

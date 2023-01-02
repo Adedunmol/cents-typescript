@@ -28,5 +28,5 @@ export const deleteClient = async (query: FilterQuery<ClientDocument>) => {
 }
 
 export const updateClient = async (query: FilterQuery<ClientDocument>, update: UpdateQuery<ClientDocument>) => {
-    return await Client.updateMany(query, update, { new: true, runValidators: true })
+    return await Client.findOneAndUpdate(query, update, { new: true, runValidators: true })
 }

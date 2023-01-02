@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UnauthorizedError } from '../errors';
-import { DecodedToken } from '../utils/interfaces';
+import { DecodedToken, DecodedData } from '../utils/interfaces';
 
 
 export const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
@@ -17,12 +17,12 @@ export const verifyJWT = async (req: Request, res: Response, next: NextFunction)
         {},
         (err: any, data) => {
             if (err) throw new UnauthorizedError('You are sending a bad token')
-            let decodedData = data as DecodedToken
+            let decodedData = data as DecodedData
 
             const dataObj = {
-                id: decodedData.id,
-                email: decodedData.email,
-                roles: decodedData.roles
+                id: decodedData.UserInfo.id,
+                email: decodedData.UserInfo.email,
+                roles: decodedData.UserInfo.roles
             }
 
             req.user = dataObj

@@ -10,7 +10,7 @@ const serviceSchema = object({
 export const invoiceSchema = object({
     body: object({
         services: array(serviceSchema),
-        dueDate: date(),
+        dueDate: string(),
     })
 })
 
