@@ -29,3 +29,7 @@ export const getInvoices = async (query: FilterQuery<InvoiceDocument>) => {
 export const updateInvoices = async (query: FilterQuery<InvoiceDocument>, update: UpdateQuery<InvoiceDocument>) => {
     return await Invoice.updateMany(query, update)
 }
+
+export const findAndUpdateInvoice = async (query: FilterQuery<InvoiceDocument>, update: UpdateQuery<InvoiceDocument>) => {
+    return await Invoice.findOneAndUpdate(query, update, { new: true, runValidators: true })
+}

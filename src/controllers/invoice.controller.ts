@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import fs from 'fs'
 import { invoiceInput } from '../schema/invoice.schema'
 import { getClient } from '../service/client.service'
-import { createInvoice, findInvoice, getInvoices } from '../service/invoice.service'
+import { createInvoice, findAndUpdateInvoice, findInvoice, getInvoices } from '../service/invoice.service'
 const { BadRequestError, NotFound } = require('../errors')
 import Client from '../models/client.model'
 import { StatusCodes } from 'http-status-codes'
@@ -84,10 +84,10 @@ export const getClientInvoicesController = async (req: Request, res: Response) =
         throw new BadRequestError('ClientId is not included with url')
     }
 
-    const client = await Client.findOne({ _id: clientId }).exec()
+    const client = await getClient({ _id: clientId })
 
     if (!client) {
-        throw new NotFound('No client with this id')
+        throw new NotFoundError('No client with this id')
     }
 
     const invoices = await getInvoices({ createdFor: client._id, createdBy })
@@ -121,18 +121,14 @@ export const updateInvoiceController = async (req: Request, res: Response) => {
     const client = await getClient({ _id: clientId })
 
     if (!client) {
-        throw new NotFound('No client with this id')
+        throw new NotFoundError('No client with this id')
     }
 
-    const invoice = await findInvoice({ _id: invoiceId, createdFor: client._id, createdBy })
+    const invoice = await findAndUpdateInvoice({ _id: invoiceId, createdFor: client._id, createdBy }, req.body)
 
     if (!invoice) {
-        throw new NotFound('No invoice found with this id')
+        throw new NotFoundError('No invoice found with this id')
     }
-
-    invoice.services = services || invoice.services
-    invoice.fullyPaid = fullyPaid || invoice.fullyPaid
-    invoice.dueDate = new Date(dueDate) || invoice.dueDate
 
     const result = await invoice.save()
 
