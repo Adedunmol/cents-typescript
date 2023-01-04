@@ -32,8 +32,9 @@ describe('user', () => {
                 // @ts-ignore
                 .mockReturnValue(userPayload)
 
-                const token = jwt.sign(userPayload, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' })
+                const roles = Object.values(userPayload.roles)
 
+                const token = jwt.sign({ UserInfo: { ...userPayload, roles }}, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' })
                 // @ts-ignore
                 const { statusCode } = await supertest(app).patch('/api/v1/users/update').send(userPayload).set('Authorization', `Bearer ${token}`)
             
