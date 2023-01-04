@@ -59,7 +59,7 @@ export const getInvoiceController = async (req: Request, res: Response) => {
         throw new BadRequestError('ClientId is not included with url')
     }
 
-    const client = await Client.findOne({ _id: clientId }).exec()
+    const client = await getClient({ _id: clientId })
 
     if (!client) {
         throw new NotFound('No client with this id')
