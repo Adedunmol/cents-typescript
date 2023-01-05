@@ -33,7 +33,8 @@ const invoicePayload = {
     createdBy: new mongoose.Types.ObjectId().toString(),
     createdFor: new mongoose.Types.ObjectId().toString(),
     createdAt: Date.now(),
-    updatedAt: Date.now()
+    updatedAt: Date.now(),
+    save: () => true
 }
 
 const invoiceInput = {
@@ -102,6 +103,54 @@ describe('invoice', () => {
                 const token = jwt.sign({ UserInfo: { ...userPayload, roles } }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' })
 
                 const { statusCode } = await supertest(app).get(`/api/v1/clients/${clientPayload._id}/invoices/${invoicePayload._id}`).send(invoiceInput).set('Authorization', `Bearer ${token}`)
+
+                expect(statusCode).toBe(200)
+            })
+        })
+    })
+
+    describe('get all invoices route', () => {
+
+        describe('given the user is logged in', () => {
+
+            it('should return a list of invoices', async () => {
+
+                jest.spyOn(InvoiceService, 'getInvoices')
+                // @ts-ignore
+                .mockReturnValue([ invoicePayload ])
+
+                const roles = Object.values(userPayload.roles)
+
+                const token = jwt.sign({ UserInfo: { ...userPayload, roles } }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' })
+
+                const { statusCode } = await supertest(app).get(`/api/v1/invoices/`).send(invoiceInput).set('Authorization', `Bearer ${token}`)
+
+                expect(statusCode).toBe(200)
+            })
+        })
+    })
+
+    describe('update invoice route', () => {
+
+        describe('given the invoice is found and valid data is sent', () => {
+
+            it('should return a 200', async () => {
+                
+                jest.spyOn(ClientService, 'getClient')
+                // @ts-ignore
+                .mockReturnValue(clientPayload)
+
+                jest.spyOn(InvoiceService, 'findAndUpdateInvoice')
+                // @ts-ignore
+                .mockReturnValue(invoicePayload)
+
+                const roles = Object.values(userPayload.roles)
+
+                const token = jwt.sign({ UserInfo: { ...userPayload, roles } }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' })
+                
+                const updateObj = { 'clientFullName': 'newClient' }
+
+                const { statusCode } = await supertest(app).patch(`/api/v1/clients/${clientPayload._id}/invoices/${invoicePayload._id}`).send(updateObj).set('Authorization', `Bearer ${token}`)
 
                 expect(statusCode).toBe(200)
             })
