@@ -1,6 +1,7 @@
 import { DocumentDefinition, FilterQuery, UpdateQuery } from "mongoose";
 import Client, { ClientDocument } from "../models/client.model";
 import Invoice from "../models/invoice.model";
+import { databaseResponseTimeHistogram } from "../utils/metrics";
 
 
 export const getAllClients = async (query: FilterQuery<ClientDocument>) => {
@@ -12,9 +13,18 @@ export const getClient = async (query: FilterQuery<ClientDocument>) => {
 }
 
 export const createClient = async (input: Omit<DocumentDefinition<ClientDocument>, 'createdAt' | 'updatedAt'>) => {
+    const metricsLabels = {
+        operation: 'createClient'
+    }
+    const timer = databaseResponseTimeHistogram.startTimer()
     try {
-        return await Client.create(input)
+        const result = await Client.create(input)
+        // @ts-ignore
+        timer({ ...metricsLabels, success: true })
+        return result
     }catch (err: any) {
+        // @ts-ignore
+        timer({ ...metricsLabels, success: false })
         throw new Error(err)
     }
 }

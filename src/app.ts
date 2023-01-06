@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 import rateLimiter from 'express-rate-limit';
 import cors from 'cors';
+import responseTime from 'response-time';
 import { sendMailOnDueDate, sendMailsAfterDueDate } from './jobs';
 import cookieParser from 'cookie-parser';
 import { verifyJWT } from './middlewares/verifyJWT';
@@ -14,6 +15,7 @@ import { routeNotFound } from './middlewares/route-not-found';
 import { errorHandler } from './middlewares/error-handler';
 import emailJobEvents from './events/';
 import { emailData } from './utils/interfaces';
+import { restResponseTimeHistogram, startMetricsServer } from './utils/metrics';
 
 const app = express()
 
@@ -37,6 +39,15 @@ app.use(cors())
 
 connectDB(process.env.DATABASE_URI as string)
 
+app.use(responseTime((req: Request, res: Response, time: number) => {
+    if (req?.route?.path) {
+        restResponseTimeHistogram.observe({
+            method: req.method,
+            route: req.route.path,
+            status_code: res.statusCode
+        }, time * 1000)
+    }
+}))
 app.use(express.json())
 app.use(cookieParser())
 

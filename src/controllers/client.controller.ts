@@ -25,6 +25,8 @@ export const getClientController = async (req: Request, res: Response) => {
 
     const client = await getClient({ _id: clientID, createdBy })
 
+    if (!client) return res.status(StatusCodes.NOT_FOUND).json({ message: 'Client not found' })
+
     return res.status(StatusCodes.OK).json({ client })
 }
 
