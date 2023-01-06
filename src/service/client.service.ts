@@ -19,12 +19,10 @@ export const createClient = async (input: Omit<DocumentDefinition<ClientDocument
     const timer = databaseResponseTimeHistogram.startTimer()
     try {
         const result = await Client.create(input)
-        // @ts-ignore
-        timer({ ...metricsLabels, success: true })
+        timer({ ...metricsLabels, success: 'true' })
         return result
     }catch (err: any) {
-        // @ts-ignore
-        timer({ ...metricsLabels, success: false })
+        timer({ ...metricsLabels, success: 'false' })
         throw new Error(err)
     }
 }
