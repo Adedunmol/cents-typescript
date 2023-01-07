@@ -11,14 +11,21 @@ import sendMail from '../utils/mail'
 import generateInvoice from '../utils/generateInvoice'
 import { NotFoundError } from '../errors'
 import { findUser } from '../service/auth.service'
+import { isAfter, isBefore } from 'date-fns'
 
 export const createInvoiceController = async (req: Request<{ id: string }, {}, invoiceInput['body']>, res: Response) => {
     const emailJobEvents = req.app.get('emailJobEvents')
 
     const { id: clientId } = req.params
     const createdBy = req.user.id
-    const { services, dueDate } = req.body
+    let { services, dueDate } = req.body
 
+    const newDueDate = new Date(dueDate)
+
+    if (isNaN(newDueDate.getTime())) throw new BadRequestError('Time is not valid')
+
+    // first date (due date) has to be greater than the current date
+    if (!isAfter(newDueDate, new Date())) throw new BadRequestError('The due date can\'t be before the current date, try a future date.')
 
     if (!clientId) {
         throw new BadRequestError('ClientId is not included with url')
@@ -32,6 +39,8 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
 
     const total = services.reduce((current, obj) => current + Math.floor(obj.rate * obj.hours), 0)
     
+    dueDate = new Date(dueDate).toISOString()
+
     const invoiceObj = { 
         ...req.body, 
         createdBy, 
