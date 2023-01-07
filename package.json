@@ -30,6 +30,7 @@
   "dependencies": {
     "@types/bcrypt": "^5.0.0",
     "@types/response-time": "^2.3.5",
+    "agenda": "^5.0.0",
     "bcrypt": "^5.1.0",
     "bull": "^4.10.2",
     "bullmq": "^3.2.2",

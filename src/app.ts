@@ -3,7 +3,6 @@ import helmet from 'helmet';
 import rateLimiter from 'express-rate-limit';
 import cors from 'cors';
 import responseTime from 'response-time';
-import { sendMailOnDueDate, sendMailsAfterDueDate } from './jobs';
 import cookieParser from 'cookie-parser';
 import { verifyJWT } from './middlewares/verifyJWT';
 import { connectDB } from './config/connect-db';
@@ -15,18 +14,20 @@ import { routeNotFound } from './middlewares/route-not-found';
 import { errorHandler } from './middlewares/error-handler';
 import emailJobEvents from './events/';
 import { emailData } from './utils/interfaces';
-import { restResponseTimeHistogram, startMetricsServer } from './utils/metrics';
+import { restResponseTimeHistogram } from './utils/metrics';
+import schedule from './jobs/scheduler'
 
 const app = express()
 
 
 emailJobEvents.on('send-reminder-mails', async (data: emailData) => {
-    await sendMailsAfterDueDate(data.invoice)
+    await schedule.reminderMails(data.invoice._id)
 })
 
 
 emailJobEvents.on('dueMail', async (data: emailData) => {
-    await sendMailOnDueDate(data.invoice)
+    console.log('due email has been emitted')
+    await schedule.dueDateMail(data.invoice._id, data.dueDate)
 })
 
 

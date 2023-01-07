@@ -1,5 +1,4 @@
 import mongoose, { Document, model, Schema } from "mongoose";
-import { zonedTimeToUtc } from 'date-fns-tz'
 
 interface Service {
     item: string;
