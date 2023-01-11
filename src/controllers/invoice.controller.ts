@@ -3,15 +3,13 @@ import fs from 'fs'
 import { invoiceInput } from '../schema/invoice.schema'
 import { getClient } from '../service/client.service'
 import { createInvoice, findAndUpdateInvoice, findInvoice, getInvoices } from '../service/invoice.service'
-const { BadRequestError, NotFound } = require('../errors')
-import Client from '../models/client.model'
+import { BadRequestError, NotFoundError } from '../errors'
 import { StatusCodes } from 'http-status-codes'
 import path from 'path'
 import sendMail from '../utils/mail'
 import generateInvoice from '../utils/generateInvoice'
-import { NotFoundError } from '../errors'
 import { findUser } from '../service/auth.service'
-import { isAfter, isBefore } from 'date-fns'
+import { isAfter, isBefore, isEqual, isSameDay } from 'date-fns'
 
 export const createInvoiceController = async (req: Request<{ id: string }, {}, invoiceInput['body']>, res: Response) => {
     const emailJobEvents = req.app.get('emailJobEvents')
@@ -24,8 +22,8 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
 
     if (isNaN(newDueDate.getTime())) throw new BadRequestError('Time is not valid')
 
-    // first date (due date) has to be greater than the current date
-    if (!isAfter(newDueDate, new Date())) throw new BadRequestError('The due date can\'t be before the current date, try a future date.')
+    // first date (due date) has to be greater than or equal to the current date
+    if (!isAfter(newDueDate, new Date()) || !isEqual(newDueDate, new Date())) throw new BadRequestError('The due date can\'t be before the current date, try a future date.')
 
     if (!clientId) {
         throw new BadRequestError('ClientId is not included with url')
@@ -71,13 +69,13 @@ export const getInvoiceController = async (req: Request, res: Response) => {
     const client = await getClient({ _id: clientId })
 
     if (!client) {
-        throw new NotFound('No client with this id')
+        throw new NotFoundError('No client with this id')
     }
 
     const invoice = await findInvoice({ _id: invoiceId, createdFor: client._id, createdBy })
 
     if (!invoice) {
-        throw new NotFound('No invoice found with this id')
+        throw new NotFoundError('No invoice found with this id')
     }
 
     return res.status(StatusCodes.OK).json({ invoice })
@@ -157,7 +155,7 @@ export const sendInvoiceToClientController = async (req: Request<{ id: string }>
     if (!invoice) throw new NotFoundError('no invoice with this id found')
     
     if (!invoice) {
-        throw new NotFound('No invoice with this id')
+        throw new NotFoundError('No invoice with this id')
     }
 
     const user = await findUser(String(invoice.createdBy))

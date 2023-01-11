@@ -1,4 +1,5 @@
-import Agenda, { Job, JobAttributesData } from 'agenda'
+import Agenda from 'agenda'
+import allDefinitions from './definitions'
 
 const agenda = new Agenda({
     name: 'mail queue',
