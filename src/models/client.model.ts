@@ -16,8 +16,7 @@ const clientSchema = new Schema({
     },
     email: {
         type: String,
-        required: [true, 'Please provide email'],
-        unique: true
+        required: [true, 'Please provide email']
     },
     phoneNumber: String,
     createdBy: {

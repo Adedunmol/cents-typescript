@@ -20,10 +20,10 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
 
     const newDueDate = new Date(dueDate)
 
-    if (isNaN(newDueDate.getTime())) throw new BadRequestError('Time is not valid')
+    if (isNaN(newDueDate.getTime())) throw new BadRequestError('Date is not valid')
 
     // first date (due date) has to be greater than or equal to the current date
-    if (!isAfter(newDueDate, new Date()) || !isEqual(newDueDate, new Date())) throw new BadRequestError('The due date can\'t be before the current date, try a future date.')
+    if (isBefore(newDueDate, new Date())) throw new BadRequestError('The due date can\'t be before the current date, try a future date.')
 
     if (!clientId) {
         throw new BadRequestError('ClientId is not included with url')
