@@ -65,12 +65,12 @@ const invoiceSchema = new Schema({
     timestamps: true
 })
 
-const allServicesPaid =async (currentService: Service) => currentService.paid === true 
+const allServicesPaid = (currentService: Service) => currentService.paid === true
 
 invoiceSchema.pre('save', async function () {
-    const user = this as InvoiceDocument
+    const invoice = this as InvoiceDocument
     
-    user.fullyPaid = user.services.every(allServicesPaid)
+    invoice.fullyPaid = invoice.services.every(allServicesPaid)
 })
 
 const Invoice = model<InvoiceDocument>('Invoice', invoiceSchema)

@@ -9,7 +9,7 @@ import path from 'path'
 import sendMail from '../utils/mail'
 import generateInvoice from '../utils/generateInvoice'
 import { findUser } from '../service/auth.service'
-import { isAfter, isBefore, isEqual, isSameDay } from 'date-fns'
+import { isBefore } from 'date-fns'
 
 export const createInvoiceController = async (req: Request<{ id: string }, {}, invoiceInput['body']>, res: Response) => {
     const emailJobEvents = req.app.get('emailJobEvents')
