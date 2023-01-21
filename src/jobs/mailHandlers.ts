@@ -26,10 +26,9 @@ export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boo
     generateInvoice(invoiceData, path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`))
     
     //sending the invoice to the client here
-    const subject = `An invoice for the contract for ${user?.fullName}`
+    const subject = `${user?.fullName}'s invoice: Payment due today`
     const text = `Please check the invoice below:`
-    const html = `<p> Please check the invoice below: </p>`
-    await sendMail(invoiceData.clientEmail, subject, text, html, invoiceData)
+    await sendMail(invoiceData.clientEmail, subject, text, 'invoice.hbs', invoiceData)
 
     //the invoice pdf is to be deleted from the invoices directory after sending to the client
     const filePath = path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`)
