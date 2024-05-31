@@ -10,7 +10,8 @@ export interface UserDocument extends Document {
         Admin?: number;
         Moderator?: number;
         User: number
-    }
+    },
+    verified: boolean;
     refreshToken: string[];
     createdAt: Date;
     updatedAt: Date;
@@ -38,6 +39,7 @@ const userSchema = new Schema({
             default: 1984
         }
     },
+    verified: Boolean,
     refreshToken: [String]
 }, {
     timestamps: true
