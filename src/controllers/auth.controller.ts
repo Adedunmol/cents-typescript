@@ -183,3 +183,8 @@ export const refreshTokenController = async (req: Request, res: Response) => {
         }
     )
 }
+
+export const verifyOtpController = async (req: Request, res: Response) => {}
+export const resendOtpController = async (req: Request, res: Response) => {}
+export const resetPasswordRequestController = async (req: Request, res: Response) => {}
+export const resetPasswordController = async (req: Request, res: Response) => {}

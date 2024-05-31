@@ -3,7 +3,7 @@ import { pick } from 'lodash';
 import { ConflictError } from '../errors';
 import User, { UserDocument } from '../models/user.model';
 
-export const createUser = async (input: DocumentDefinition<Omit<UserDocument, 'comparePassword' |'refreshToken' | 'createdAt' | 'updatedAt'>>) => {
+export const createUser = async (input: DocumentDefinition<Omit<UserDocument, 'comparePassword' |'refreshToken' | 'createdAt' | 'updatedAt' | 'verified'>>) => {
     try {
         const user = await User.create(input)
 
