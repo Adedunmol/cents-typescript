@@ -4,6 +4,7 @@ import { compile } from 'handlebars'
 import { InvoiceDocument } from "../models/invoice.model"
 import path from 'path'
 import nodemailer from 'nodemailer'
+import logger from "./logger"
 
 const sendMail = async (to: string, subject: string, text: string, html: string, invoice: DocumentDefinition<InvoiceDocument>) => {
     
@@ -21,6 +22,14 @@ const sendMail = async (to: string, subject: string, text: string, html: string,
         auth: {
             user: process.env.ADMIN,
             pass: process.env.EMAIL_PASSWORD
+        }
+    })
+
+    transport.verify((err, success) => {
+        if (err) {
+            logger.error("mail verification failed: ")
+            logger.error(err)
+            throw new Error("Can't send mails")
         }
     })
 
