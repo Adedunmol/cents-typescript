@@ -7,7 +7,7 @@ export const startInvoiceWorker = async () => {
     try {
         const conn = await amqp.connect("amqp://localhost")
         const channel = await conn.createChannel()
-        const queue = "invoice"
+        const queue = "invoices"
 
         await channel.assertQueue(queue, { durable: true })
         logger.info(`Waiting for messages in ${queue}. To exit press CTRL+C`)

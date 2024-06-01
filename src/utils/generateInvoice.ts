@@ -23,7 +23,7 @@ function dateDiffInDays(date1: Date, date2: Date) {
 }
 
 
-function createInvoice(invoice: DocumentDefinition<InvoiceDocument>, path: string) {
+async function createInvoice(invoice: DocumentDefinition<InvoiceDocument>, path: string) {
     let doc = new PDFDocument({ margin: 50 })
 
     generateHeader(doc)
