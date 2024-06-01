@@ -5,43 +5,7 @@ import { InvoiceDocument } from "../models/invoice.model"
 import path from 'path'
 import nodemailer from 'nodemailer'
 import logger from "./logger"
-import amqp from "amqplib";
 
-export const sendToQueue = async (emailData: any) => {
-    const conn = await amqp.connect("amqp://localhost")
-    const channel = await conn.createChannel()
-    const queue = "emails"
-
-    await channel.assertQueue(queue, { durable: true })
-
-    channel.sendToQueue(queue, Buffer.from(JSON.stringify(emailData)), { persistent: true })
-
-    logger.info("Email request sent to queue")
-    setTimeout(() => {
-        channel.close()
-        conn.close()
-    }, 500)
-}
-
-export const startWorker = async () => {
-    try {
-        const conn = await amqp.connect("amqp://localhost")
-        const channel = await conn.createChannel()
-        const queue = "emails"
-
-        await channel.assertQueue(queue, { durable: true })
-        logger.info(`Waiting for messages in ${queue}. To exit press CTRL+C`)
-
-        channel.consume(queue, async msg => {
-            if (msg !== null) {
-                const emailData = JSON.parse(msg.content.toString())
-                await sendMail(emailData)
-            }
-        })
-    } catch (err: any) {
-        logger.error("error starting worker")
-    }
-}
 
 interface emailData {
     to: string
@@ -72,8 +36,7 @@ const sendMail = async (emailData: emailData) => {
 
     transport.verify((err, success) => {
         if (err) {
-            logger.error("mail verification failed: ")
-            logger.error(err)
+            logger.error("mail verification failed")
             throw new Error("Can't send mails")
         }
     })

@@ -162,13 +162,13 @@ export const sendInvoiceToClientController = async (req: Request<{ id: string }>
 
     if (!user) throw new NotFoundError('no user found with this id')
 
-    generateInvoice(invoice, path.join(__dirname, '..', 'invoices', `${invoice._id}.pdf`))
+    // generateInvoice(invoice, path.join(__dirname, '..', 'invoices', `${invoice._id}.pdf`))
     
-    //send invoice as mail to the client here
-    const subject = `An invoice for the contract for ${user.fullName}`
-    const text = `Please check the invoice below:`
-    const html = `<p> Please check the invoice below: </p>`
-    await sendMail(invoice.clientEmail, subject, text, html, invoice)
+    // //send invoice as mail to the client here
+    // const subject = `An invoice for the contract for ${user.fullName}`
+    // const text = `Please check the invoice below:`
+    // const html = `<p> Please check the invoice below: </p>`
+    // await sendMail(invoice.clientEmail, subject, text, html, invoice)
 
     //delete the invoice from the invoices directory
     fs.unlink(path.join(__dirname, '..', 'invoices', `${String(invoice._id)}.pdf`), (err: any) => {
