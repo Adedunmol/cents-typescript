@@ -3,6 +3,7 @@ require('dotenv').config()
 import app from "./app";
 import mongoose from "mongoose";
 import { startMetricsServer } from "./utils/metrics";
+import { startWorker } from "./utils/mail";
 
 const PORT = process.env.PORT || 5000
 
@@ -12,5 +13,6 @@ mongoose.connection.once('open', () => {
         console.log(`App is listening on port ${PORT}...`)
 
         startMetricsServer()
+        startWorker()
     })
 })
