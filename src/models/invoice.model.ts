@@ -17,6 +17,8 @@ export interface InvoiceDocument extends Document {
     fullyPaid: boolean;
     createdBy: mongoose.Types.ObjectId;
     createdFor: mongoose.Types.ObjectId;
+    frequency: number;
+    interval: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -59,8 +61,16 @@ const invoiceSchema = new Schema({
         type: mongoose.Types.ObjectId,
         ref: 'Client',
         required: [true, 'Please provide client']
+    },
+    frequency: {
+        type: Number,
+        required: [true, 'Please provide frequency']
+    },
+    interval: {
+        type: String,
+        required: [true, 'Please provide interval'],
+        enum: ['day', 'week', 'month']
     }
-
 }, {
     timestamps: true
 })
