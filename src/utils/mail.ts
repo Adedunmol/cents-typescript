@@ -5,7 +5,8 @@ import { InvoiceDocument } from "../models/invoice.model"
 import path from 'path'
 import nodemailer from 'nodemailer'
 import logger from "./logger"
-
+import UserOTPVerification from "../models/user-otp-verification.model"
+import bcrypt from "bcrypt"
 
 interface emailData {
     to: string
@@ -13,6 +14,37 @@ interface emailData {
     text: string
     html: string
     invoice: DocumentDefinition<InvoiceDocument>
+}
+
+const OTP_EXPIRATION = 3600000
+
+export const sendOTPVerificationEmail = async ({ _id, email }: { _id: string, email: string }, res: Response) => {
+    try {
+        const otp = `${Math.floor(1000 + Math.random() * 9000)}`
+
+        const hashedOTP = await bcrypt.hash(otp, 10)
+
+        const userOTPVerification = await UserOTPVerification.create({
+            userId: _id,
+            otp: hashedOTP,
+            expiresAt: Date.now() + OTP_EXPIRATION
+        })
+
+        const message = `Enter ${otp} in the app to verify your email address and complete registration. This code expires in 1 hour`
+        const html = `</p>Enter <b>${otp}</b> in the app to verify your email address and complete registration</p>. <p>This code <b>expires in 1 hour</b>.</p>`
+        
+        logger.info("sending verification mail")
+        // send mail
+        // await sendMail(email, "OTP verification", message, html)
+
+        // return res.status(200).json({ status: "pending", message: "Verification OTP email sent", data: { userId: _id, email } })
+    } catch(err: any) {
+
+        logger.error("could not send verification mail")
+        logger.error(err)
+        throw new Error("Could not send verification mail")
+        // return res.status(500).json({ status: "error", message: err.message })
+    }
 }
 
 const sendMail = async (emailData: emailData) => {

@@ -5,7 +5,11 @@ import admin_list from "../config/admin_list";
 import { NotFoundError, UnauthorizedError, ForbiddenError, ConflictError } from "../errors";
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
-import { DecodedToken } from '../utils/interfaces'
+import { DecodedToken } from '../utils/interfaces';
+import bcrypt from 'bcrypt';
+import UserOTPVerification from "../models/user-otp-verification.model";
+import User from "../models/user.model";
+import { sendToQueue } from "../queue";
 
 export const registerController = async (req: Request<{}, {}, createUserInput['body']>, res: Response) => {
     try {
@@ -18,6 +22,8 @@ export const registerController = async (req: Request<{}, {}, createUserInput['b
     }
     
     const user = await createUser(req.body)
+
+    // sendToQueue('emails', ) // send verification mail to user
 
     return res.status(StatusCodes.CREATED).json({ user })
     } catch (err: any) {
@@ -184,7 +190,93 @@ export const refreshTokenController = async (req: Request, res: Response) => {
     )
 }
 
-export const verifyOtpController = async (req: Request, res: Response) => {}
-export const resendOtpController = async (req: Request, res: Response) => {}
-export const resetPasswordRequestController = async (req: Request, res: Response) => {}
-export const resetPasswordController = async (req: Request, res: Response) => {}
+export const verifyOtpController = async (req: Request, res: Response) => {
+    const userOTPRecords = await UserOTPVerification.find({ userId: req.body.userId.trim() })
+
+    if (userOTPRecords.length <= 0) {
+        throw new Error("Account record doesn't exist or has been verified already. Please sign up or log in.")
+    }
+
+    // user otp record exists
+    const { expiresAt } = userOTPRecords[0]
+    const hashedOTP = userOTPRecords[0].otp
+
+    if (expiresAt < Date.now()) {
+
+        await UserOTPVerification.deleteMany({ userId: req.body.userId.trim() })
+        throw new Error("Code has expired. Please request again.")
+    }
+
+    const validOTP = await bcrypt.compare(req.body.otp, hashedOTP)
+
+    if (!validOTP) {
+        throw new Error("Invalid code passed. Check your inbox.")
+    }
+
+    const user = await User.findOneAndUpdate({ _id: req.body.userId.trim() }, { verified: true }, { new: true })
+
+    await UserOTPVerification.deleteMany({ userId: req.body.userId.trim() })  
+    
+    return res.status(200).json({ status: "verified", message: "User email verified successfully", data: { id: user?.id } })
+}
+
+export const resendOtpController = async (req: Request, res: Response) => {
+    await UserOTPVerification.deleteMany({ userId: req.body.userId.trim() })
+    // await sendOTPVerificationEmail({ _id: req.body.userId.trim(), email: req.body.email.trim() }, res)
+
+    return res.status(200).json({ status: "pending", message: "Verification OTP email sent", data: { userId: req.body.userId, email: req.body.email } })
+}
+
+export const resetPasswordRequestController = async (req: Request, res: Response) => {
+    const user = await User.findOne({ email: req.body.email.trim() })
+
+    if (!user) throw new Error("No user found with this email")
+
+    if (!user.verified) throw new Error("Email hasn't been verified yet. Check your inbox.")
+
+    const otpDetails = {
+        email: req.body.email.trim(),
+        _id: user.id
+    }
+
+    await UserOTPVerification.deleteMany({ userId: user.id })
+    // const userOTPVerification = await sendPasswordResetEmail(otpDetails, res)
+
+    return res.status(200).json({ status: "success", data: { userId: user.id, email: user.email, otp: '1234' } }) // userOTPVerification.otp
+
+}
+
+export const resetPasswordController = async (req: Request, res: Response) => {
+    const user = await User.findOne({ email: req.body.email.trim() })
+
+    if (!user) throw new Error("No user found with this email")
+
+    const userOTPRecords = await UserOTPVerification.find({ userId: user.id })
+
+    if (userOTPRecords.length <= 0) {
+        throw new Error("Password reset request has not been made.")
+    }
+
+    // user otp record exists
+    const { expiresAt } = userOTPRecords[0]
+    const hashedOTP = userOTPRecords[0].otp
+
+    if (expiresAt < Date.now()) {
+
+        await UserOTPVerification.deleteMany({ email: req.body.email.trim() })
+        throw new Error("Code has expired. Please request again.")
+    }
+
+    const validOTP = await bcrypt.compare(req.body.otp.trim(), hashedOTP)
+
+    if (!validOTP) {
+        throw new Error("Invalid code passed. Check your inbox.")
+    }
+
+    user.password = req.body.password.trim()
+    const result = await user.save()
+
+    await UserOTPVerification.deleteMany({ userId: user.id })
+
+    return res.status(200).json({ status: "success", message: "Password changed successfully" })
+}
