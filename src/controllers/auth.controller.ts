@@ -220,7 +220,7 @@ export const verifyOtpController = async (req: Request, res: Response) => {
     return res.status(200).json({ status: "verified", message: "User email verified successfully", data: { id: user?.id } })
 }
 
-export const resendOtpController = async (req: Request, res: Response) => {
+export const resendOTPController = async (req: Request, res: Response) => {
     await UserOTPVerification.deleteMany({ userId: req.body.userId.trim() })
     // await sendOTPVerificationEmail({ _id: req.body.userId.trim(), email: req.body.email.trim() }, res)
 

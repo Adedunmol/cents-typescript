@@ -24,5 +24,40 @@ export const loginSchema = object({
     })
 })
 
+export const verifyOTPSchema = object({
+    body: object({
+        userId: string({ required_error: "userId is required" }),
+        otp: string({ required_error: "otp is required" })
+    })
+})
+export const resendOTPSchema = object({
+    body: object({
+        userId: string({ required_error: "userId is required" }),
+        email: string({ required_error: "email is required" })
+    })
+})
+
+export const forgotPasswordSchema = object({
+    body: object({
+        email: string({ required_error: "email is required" }),
+    })
+})
+
+export const resetPasswordSchema = object({
+    body: object({
+        email: string({ required_error: "email is required" }),
+        otp: string({ required_error: "otp is required" }),
+        password: string({ required_error: "password is required" }).min(6, "Password too short - should be 6 chars minimum"),
+        passwordConfirmation: string({ required_error: "passwordConfirmation is required" }),
+    }).refine((data) => data.password === data.passwordConfirmation, {
+        message: "Passwords do not match",
+        path: ["passwordConfirmation"]
+    })
+})
+
 export type loginUserInput = TypeOf<typeof loginSchema>
 export type createUserInput = Omit<TypeOf<typeof createUserSchema>, 'body.passwordConfirmation'>
+export type VerifyOTPInput = TypeOf<typeof verifyOTPSchema>;
+export type ResendOTPInput = TypeOf<typeof resendOTPSchema>;
+export type ForgotPasswordInput = TypeOf<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = TypeOf<typeof resetPasswordSchema>;
