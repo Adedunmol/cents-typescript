@@ -1,5 +1,5 @@
 import { DocumentDefinition } from "mongoose"
-import { InvoiceDocument } from "../models/invoice.model"
+import Invoice, { InvoiceDocument } from "../models/invoice.model"
 
 import agenda from "./agendaInstance"
 
@@ -13,8 +13,11 @@ const scheduler = {
     },
 
     reminderMails: async (invoiceId: string) => {
-        
-        await agenda.every('1 week', 'send-reminder-mails', { id: invoiceId })
+        const invoice = await Invoice.findById(invoiceId)
+
+        if (!invoice) return
+
+        await agenda.every(`${invoice.frequency} ${invoice.interval}`, 'send-reminder-mails', { id: invoiceId })
     }
 }
 

@@ -10,7 +10,9 @@ const serviceSchema = object({
 export const invoiceSchema = object({
     body: object({
         services: array(serviceSchema),
-        dueDate: string(),
+        dueDate: string({ required_error: "dueDate is required" }),
+        frequency: number({ required_error: "frequency is required" }),
+        interval: string({ required_error: "interval is required" })
     })
 })
 
