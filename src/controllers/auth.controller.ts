@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { createUserInput, loginUserInput } from "../schema/auth.schema";
-import { createUser, findUser, findUserWithToken, validatePassword } from "../service/auth.service";
+import { createUser, deleteUserOtp, findUserByEmail, findUserWithOtp, findUserWithToken, updateUserVerification, validatePassword } from "../service/auth.service";
 import admin_list from "../config/admin_list";
-import { NotFoundError, UnauthorizedError, ForbiddenError, ConflictError } from "../errors";
+import { NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, BadRequestError } from "../errors";
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { DecodedToken } from '../utils/interfaces';
@@ -10,6 +10,7 @@ import bcrypt from 'bcrypt';
 import UserOTPVerification from "../models/user-otp-verification.model";
 import User from "../models/user.model";
 import { sendToQueue } from "../queue";
+import { de } from "date-fns/locale";
 
 export const registerController = async (req: Request<{}, {}, createUserInput['body']>, res: Response) => {
     try {
@@ -130,7 +131,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
                     throw new ForbiddenError('bad token for reuse')
                 }
                 let decodedData = data as DecodedToken
-                const user = await findUser(decodedData?.email)
+                const user = await findUserByEmail(decodedData?.email)
                 
                 if (user) {
                     user.refreshToken = []
@@ -191,10 +192,10 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 }
 
 export const verifyOtpController = async (req: Request, res: Response) => {
-    const userOTPRecords = await UserOTPVerification.find({ userId: req.body.userId.trim() })
+    const userOTPRecords = await findUserWithOtp(req.body.userId.trim())
 
     if (userOTPRecords.length <= 0) {
-        throw new Error("Account record doesn't exist or has been verified already. Please sign up or log in.")
+        throw new BadRequestError("Account record doesn't exist or has been verified already. Please sign up or log in.")
     }
 
     // user otp record exists
@@ -203,43 +204,43 @@ export const verifyOtpController = async (req: Request, res: Response) => {
 
     if (expiresAt < Date.now()) {
 
-        await UserOTPVerification.deleteMany({ userId: req.body.userId.trim() })
-        throw new Error("Code has expired. Please request again.")
+        await deleteUserOtp(req.body.userId.trim())
+        throw new BadRequestError("Code has expired. Please request again.")
     }
 
     const validOTP = await bcrypt.compare(req.body.otp, hashedOTP)
 
     if (!validOTP) {
-        throw new Error("Invalid code passed. Check your inbox.")
+        throw new BadRequestError("Invalid code passed. Check your inbox.")
     }
 
-    const user = await User.findOneAndUpdate({ _id: req.body.userId.trim() }, { verified: true }, { new: true })
+    const user = await updateUserVerification(req.body.userId.trim())
 
-    await UserOTPVerification.deleteMany({ userId: req.body.userId.trim() })  
+    await deleteUserOtp(req.body.userId.trim())
     
     return res.status(200).json({ status: "verified", message: "User email verified successfully", data: { id: user?.id } })
 }
 
 export const resendOTPController = async (req: Request, res: Response) => {
-    await UserOTPVerification.deleteMany({ userId: req.body.userId.trim() })
+    await deleteUserOtp(req.body.userId.trim())
     // await sendOTPVerificationEmail({ _id: req.body.userId.trim(), email: req.body.email.trim() }, res)
 
     return res.status(200).json({ status: "pending", message: "Verification OTP email sent", data: { userId: req.body.userId, email: req.body.email } })
 }
 
 export const resetPasswordRequestController = async (req: Request, res: Response) => {
-    const user = await User.findOne({ email: req.body.email.trim() })
+    const user = await findUserByEmail(req.body.email.trim())
 
-    if (!user) throw new Error("No user found with this email")
+    if (!user) throw new NotFoundError("No user found with this email")
 
-    if (!user.verified) throw new Error("Email hasn't been verified yet. Check your inbox.")
+    if (!user.verified) throw new BadRequestError("Email hasn't been verified yet. Check your inbox.")
 
     const otpDetails = {
         email: req.body.email.trim(),
         _id: user.id
     }
 
-    await UserOTPVerification.deleteMany({ userId: user.id })
+    await deleteUserOtp(user.id)
     // const userOTPVerification = await sendPasswordResetEmail(otpDetails, res)
 
     return res.status(200).json({ status: "success", data: { userId: user.id, email: user.email, otp: '1234' } }) // userOTPVerification.otp
@@ -247,14 +248,14 @@ export const resetPasswordRequestController = async (req: Request, res: Response
 }
 
 export const resetPasswordController = async (req: Request, res: Response) => {
-    const user = await User.findOne({ email: req.body.email.trim() })
+    const user = await findUserByEmail(req.body.email.trim())
 
-    if (!user) throw new Error("No user found with this email")
+    if (!user) throw new NotFoundError("No user found with this email")
 
-    const userOTPRecords = await UserOTPVerification.find({ userId: user.id })
+    const userOTPRecords = await findUserWithOtp(user.id)
 
     if (userOTPRecords.length <= 0) {
-        throw new Error("Password reset request has not been made.")
+        throw new BadRequestError("Password reset request has not been made.")
     }
 
     // user otp record exists
@@ -263,20 +264,20 @@ export const resetPasswordController = async (req: Request, res: Response) => {
 
     if (expiresAt < Date.now()) {
 
-        await UserOTPVerification.deleteMany({ email: req.body.email.trim() })
-        throw new Error("Code has expired. Please request again.")
+        await deleteUserOtp(user.id)
+        throw new BadRequestError("Code has expired. Please request again.")
     }
 
     const validOTP = await bcrypt.compare(req.body.otp.trim(), hashedOTP)
 
     if (!validOTP) {
-        throw new Error("Invalid code passed. Check your inbox.")
+        throw new BadRequestError("Invalid code passed. Check your inbox.")
     }
 
     user.password = req.body.password.trim()
     const result = await user.save()
 
-    await UserOTPVerification.deleteMany({ userId: user.id })
+    await deleteUserOtp(user.id)
 
     return res.status(200).json({ status: "success", message: "Password changed successfully" })
 }
