@@ -24,6 +24,14 @@ export const findUserByEmail = async (email: string) => {
     }
 }
 
+export const findUserById = async (id: string) => {
+    try {
+        return await User.findById(id)
+    }catch (err: any) {
+        throw new NotFoundError(err)
+    }
+}
+
 export const findUserWithToken = async (refreshToken: string) => {
     try {
         return await User.findOne({ refreshToken })

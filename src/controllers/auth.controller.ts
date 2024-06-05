@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { createUserInput, loginUserInput } from "../schema/auth.schema";
-import { createUser, deleteUserOtp, findUserByEmail, findUserWithOtp, findUserWithToken, generateOtp, updateUserVerification, validatePassword } from "../service/auth.service";
+import { createUser, deleteUserOtp, findUserByEmail, findUserById, findUserWithOtp, findUserWithToken, generateOtp, updateUserVerification, validatePassword } from "../service/auth.service";
 import admin_list from "../config/admin_list";
 import { NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, BadRequestError } from "../errors";
 import jwt from 'jsonwebtoken';
@@ -226,7 +226,19 @@ export const verifyOtpController = async (req: Request, res: Response) => {
 
 export const resendOTPController = async (req: Request, res: Response) => {
     await deleteUserOtp(req.body.userId.trim())
-    // await sendOTPVerificationEmail({ _id: req.body.userId.trim(), email: req.body.email.trim() }, res)
+
+    const user = await findUserById(req.body.userId.trim())
+
+    if (!user) throw new NotFoundError("No user found with this id")
+
+    const otp = await generateOtp(user.id, user.email)
+    
+    const emailData = {
+        template: "verification",
+        locals: { username: user.username, otp },
+        to: user.email
+    }
+    sendToQueue('emails', emailData) // send verification mail to user
 
     return res.status(200).json({ status: "pending", message: "Verification OTP email sent", data: { userId: req.body.userId, email: req.body.email } })
 }
@@ -244,6 +256,16 @@ export const resetPasswordRequestController = async (req: Request, res: Response
     }
 
     await deleteUserOtp(user.id)
+
+    const otp = await generateOtp(user.id, user.email)
+    
+    const emailData = {
+        template: "forgot-password",
+        locals: { otp },
+        to: user.email
+    }
+    sendToQueue('emails', emailData) // send verification mail to user
+
     // const userOTPVerification = await sendPasswordResetEmail(otpDetails, res)
 
     return res.status(200).json({ status: "success", data: { userId: user.id, email: user.email, otp: '1234' } }) // userOTPVerification.otp
