@@ -20,15 +20,15 @@ import schedule from './jobs/scheduler'
 const app = express()
 
 
-emailJobEvents.on('send-reminder-mails', async (data: emailData) => {
-    await schedule.reminderMails(data.invoice._id)
-})
+// emailJobEvents.on('send-reminder-mails', async (data: emailData) => {
+//     await schedule.reminderMails(data.invoice._id)
+// })
 
 
-emailJobEvents.on('dueMail', async (data: emailData) => {
-    console.log('due email has been emitted')
-    await schedule.dueDateMail(data.invoice._id, data.dueDate)
-})
+// emailJobEvents.on('dueMail', async (data: emailData) => {
+//     console.log('due email has been emitted')
+//     await schedule.dueDateMail(data.invoice._id, data.dueDate)
+// })
 
 
 app.set('emailJobEvents', emailJobEvents)

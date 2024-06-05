@@ -26,17 +26,23 @@ export const sendMailWithTemplates = async (template: string, locals: any,  to: 
               from: 'hi@example.com'
             },
             send: true,
+            preview: false,
             transport: {
-              host: 'sandbox.smtp.mailtrap.io',
-              port: 2525,
-              auth: {
+                host: 'sandbox.smtp.mailtrap.io',
+                port: 2525,
+                auth: {
                 user: process.env.MAILTRAP_USERNAME, // your Mailtrap username
                 pass: process.env.MAILTRAP_PASSWORD //your Mailtrap password
               }
-            }
+            },
         })
 
-        const res = await email.send({ template, message: { to }, locals })
+        const res = await email.send({ 
+            template: path.join(__dirname, '..', 'emails', template), 
+            message: { to }, 
+            locals
+        })
+        logger.info(`email sent to ${to}`)
     } catch (err: any) {
         logger.error("unable send mail")
         logger.error(err)

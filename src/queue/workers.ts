@@ -45,6 +45,7 @@ export const startEmailWorker = async () => {
         channel.consume(queue, async msg => {
             if (msg !== null) {
                 const emailData = JSON.parse(msg.content.toString())
+                logger.info(`Sending mail to ${emailData.to}`)
                 await sendMailWithTemplates(emailData.template, emailData.locals, emailData.to)
             }
         })

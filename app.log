@@ -1,0 +1,29 @@
+{
+  message: 'unable send mail',
+  level: 'error',
+  timestamp: '2024-06-05T08:53:16.237Z'
+}
+{
+  level: 'error',
+  message: 'No content was passed for subject, html, text, nor attachments message props. Check that the files for the template "verification" exist.',
+  stack: 'Error: No content was passed for subject, html, text, nor attachments message props. Check that the files for the template "verification" exist.\n' +
+    '    at Email.renderAll (C:\\Users\\USER\\cents-typescript\\node_modules\\email-templates\\index.js:299:13)\n' +
+    '    at Email.send (C:\\Users\\USER\\cents-typescript\\node_modules\\email-templates\\index.js:333:20)',
+  timestamp: '2024-06-05T08:53:16.240Z'
+}
+{
+  message: 'unable send mail',
+  level: 'error',
+  timestamp: '2024-06-05T09:22:18.323Z'
+}
+{
+  errno: -4077,
+  code: 'ESOCKET',
+  syscall: 'read',
+  command: 'CONN',
+  level: 'error',
+  message: 'read ECONNRESET',
+  stack: 'Error: read ECONNRESET\n' +
+    '    at TCP.onStreamRead (node:internal/stream_base_commons:217:20)',
+  timestamp: '2024-06-05T09:22:18.335Z'
+}
