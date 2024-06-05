@@ -2,6 +2,8 @@ import amqp from "amqplib";
 import logger from "../utils/logger"
 import sendMail, { sendMailWithTemplates } from "../utils/mail";
 import createInvoice from "../utils/generateInvoice";
+import path from "path"
+import fs from "fs"
 
 export const startInvoiceWorker = async () => {
     try {
@@ -16,6 +18,14 @@ export const startInvoiceWorker = async () => {
             if (msg !== null) {
                 const invoiceData = JSON.parse(msg.content.toString())
                 await createInvoice(invoiceData, invoiceData.path)
+
+                if (invoiceData.sendToEmail) {
+                    await sendMailWithTemplates("invoice", invoiceData.invoice, invoiceData.invoice.clientEmail)
+                }
+
+                fs.unlink(path.join(__dirname, '..', 'invoices', `${String(invoiceData.invoice._id)}.pdf`), (err: any) => {
+                    if (err) throw new Error(err)
+                })
             }
         })
     } catch (err: any) {

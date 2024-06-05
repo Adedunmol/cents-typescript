@@ -27,7 +27,7 @@ export const registerController = async (req: Request<{}, {}, createUserInput['b
         locals: { username: user.username, otp },
         to: user.email
     }
-    sendToQueue('emails', emailData) // send verification mail to user
+    await sendToQueue('emails', emailData) // send verification mail to user
 
     return res.status(StatusCodes.CREATED).json({ user })
     } catch (err: any) {
@@ -238,7 +238,7 @@ export const resendOTPController = async (req: Request, res: Response) => {
         locals: { username: user.username, otp },
         to: user.email
     }
-    sendToQueue('emails', emailData) // send verification mail to user
+    await sendToQueue('emails', emailData) // send verification mail to user
 
     return res.status(200).json({ status: "pending", message: "Verification OTP email sent", data: { userId: req.body.userId, email: req.body.email } })
 }
@@ -265,8 +265,6 @@ export const resetPasswordRequestController = async (req: Request, res: Response
         to: user.email
     }
     sendToQueue('emails', emailData) // send verification mail to user
-
-    // const userOTPVerification = await sendPasswordResetEmail(otpDetails, res)
 
     return res.status(200).json({ status: "success", data: { userId: user.id, email: user.email, otp: '1234' } }) // userOTPVerification.otp
 
