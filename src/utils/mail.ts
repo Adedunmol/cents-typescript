@@ -7,6 +7,7 @@ import nodemailer from 'nodemailer'
 import logger from "./logger"
 import UserOTPVerification from "../models/user-otp-verification.model"
 import bcrypt from "bcrypt"
+import Email from "email-templates"
 
 interface emailData {
     to: string
@@ -17,6 +18,30 @@ interface emailData {
 }
 
 const OTP_EXPIRATION = 3600000
+
+export const sendMailWithTemplates = async (template: string, locals: any,  to: string) => {
+    try {
+        const email = new Email({
+            message: {
+              from: 'hi@example.com'
+            },
+            send: true,
+            transport: {
+              host: 'sandbox.smtp.mailtrap.io',
+              port: 2525,
+              auth: {
+                user: process.env.MAILTRAP_USERNAME, // your Mailtrap username
+                pass: process.env.MAILTRAP_PASSWORD //your Mailtrap password
+              }
+            }
+        })
+
+        const res = await email.send({ template, message: { to }, locals })
+    } catch (err: any) {
+        logger.error("unable send mail")
+        logger.error(err)
+    }
+}
 
 export const sendOTPVerificationEmail = async ({ _id, email }: { _id: string, email: string }, res: Response) => {
     try {
@@ -35,9 +60,8 @@ export const sendOTPVerificationEmail = async ({ _id, email }: { _id: string, em
         
         logger.info("sending verification mail")
         // send mail
-        // await sendMail(email, "OTP verification", message, html)
+        // await sendMailWIthTemplates("verification", { username, otp })
 
-        // return res.status(200).json({ status: "pending", message: "Verification OTP email sent", data: { userId: _id, email } })
     } catch(err: any) {
 
         logger.error("could not send verification mail")

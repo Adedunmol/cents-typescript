@@ -8,11 +8,13 @@ import { StatusCodes } from 'http-status-codes'
 import path from 'path'
 import sendMail from '../utils/mail'
 import generateInvoice from '../utils/generateInvoice'
-import { findUser } from '../service/auth.service'
+import { findUserByEmail } from '../service/auth.service'
 import { isBefore } from 'date-fns'
+import { sendToQueue } from '../queue'
+import scheduler from '../jobs/scheduler'
 
 export const createInvoiceController = async (req: Request<{ id: string }, {}, invoiceInput['body']>, res: Response) => {
-    const emailJobEvents = req.app.get('emailJobEvents')
+    // const emailJobEvents = req.app.get('emailJobEvents')
 
     const { id: clientId } = req.params
     const createdBy = req.user.id
@@ -51,8 +53,9 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
 
     const invoice = await createInvoice(invoiceObj)
     //mailScheduleOnDueDate(invoice, dueDate)
-    //schedule.dueDateMail(invoice, dueDate)
-    emailJobEvents.emit('dueMail', { invoice, dueDate })
+    scheduler.dueDateMail(invoice, dueDate)
+    // emailJobEvents.emit('dueMail', { invoice, dueDate })
+    // sendToQueue("invoices", invoice)
 
     return res.status(StatusCodes.CREATED).json({ invoice })
 }
@@ -158,7 +161,7 @@ export const sendInvoiceToClientController = async (req: Request<{ id: string }>
         throw new NotFoundError('No invoice with this id')
     }
 
-    const user = await findUser(String(invoice.createdBy))
+    const user = await findUserByEmail(String(invoice.createdBy))
 
     if (!user) throw new NotFoundError('no user found with this id')
 
