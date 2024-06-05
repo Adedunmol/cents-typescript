@@ -2,6 +2,7 @@ import mongoose, { Document, model, Schema } from "mongoose";
 import bcrypt from 'bcrypt';
 
 export interface UserDocument extends Document {
+    username: string;
     fullName: string;
     email: string;
     password: string;
@@ -18,6 +19,11 @@ export interface UserDocument extends Document {
 }
 
 const userSchema = new Schema({
+    username: {
+        type: String,
+        required: [true, 'Please provide username'],
+        trim: true
+    },
     fullName: {
         type: String,
         required: [true, 'Please provide full name']

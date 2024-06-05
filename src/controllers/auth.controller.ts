@@ -1,16 +1,14 @@
 import { Request, Response } from "express";
 import { createUserInput, loginUserInput } from "../schema/auth.schema";
-import { createUser, deleteUserOtp, findUserByEmail, findUserWithOtp, findUserWithToken, updateUserVerification, validatePassword } from "../service/auth.service";
+import { createUser, deleteUserOtp, findUserByEmail, findUserWithOtp, findUserWithToken, generateOtp, updateUserVerification, validatePassword } from "../service/auth.service";
 import admin_list from "../config/admin_list";
 import { NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, BadRequestError } from "../errors";
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { DecodedToken } from '../utils/interfaces';
 import bcrypt from 'bcrypt';
-import UserOTPVerification from "../models/user-otp-verification.model";
-import User from "../models/user.model";
 import { sendToQueue } from "../queue";
-import { de } from "date-fns/locale";
+
 
 export const registerController = async (req: Request<{}, {}, createUserInput['body']>, res: Response) => {
     try {
@@ -23,8 +21,13 @@ export const registerController = async (req: Request<{}, {}, createUserInput['b
     }
     
     const user = await createUser(req.body)
-
-    // sendToQueue('emails', ) // send verification mail to user
+    const otp = await generateOtp(user._id, user.email)
+    const emailData = {
+        template: "verification",
+        locals: { username: user.username, otp },
+        to: user.email
+    }
+    sendToQueue('emails', emailData) // send verification mail to user
 
     return res.status(StatusCodes.CREATED).json({ user })
     } catch (err: any) {

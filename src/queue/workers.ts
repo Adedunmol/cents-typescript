@@ -1,6 +1,6 @@
 import amqp from "amqplib";
 import logger from "../utils/logger"
-import sendMail from "../utils/mail";
+import sendMail, { sendMailWithTemplates } from "../utils/mail";
 import createInvoice from "../utils/generateInvoice";
 
 export const startInvoiceWorker = async () => {
@@ -35,7 +35,7 @@ export const startEmailWorker = async () => {
         channel.consume(queue, async msg => {
             if (msg !== null) {
                 const emailData = JSON.parse(msg.content.toString())
-                await sendMail(emailData)
+                await sendMailWithTemplates(emailData.template, emailData.locals, emailData.to)
             }
         })
     } catch (err: any) {
