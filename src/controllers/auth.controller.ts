@@ -8,6 +8,7 @@ import { StatusCodes } from 'http-status-codes';
 import { DecodedToken } from '../utils/interfaces';
 import bcrypt from 'bcrypt';
 import { sendToQueue } from "../queue";
+import logger from "../utils/logger";
 
 
 export const registerController = async (req: Request<{}, {}, createUserInput['body']>, res: Response) => {
@@ -27,6 +28,8 @@ export const registerController = async (req: Request<{}, {}, createUserInput['b
         locals: { username: user.username, otp },
         to: user.email
     }
+
+    logger.info(`created user ${user.username} with otp ${otp}`)
     await sendToQueue('emails', emailData) // send verification mail to user
 
     return res.status(StatusCodes.CREATED).json({ user })

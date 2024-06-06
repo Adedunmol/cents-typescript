@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/amqplib": "^0.10.5",
+    "@types/bull-arena": "^3.0.10",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/email-templates": "^10.0.4",
@@ -34,6 +35,8 @@
     "agenda": "^5.0.0",
     "amqplib": "^0.10.4",
     "bcrypt": "^5.1.1",
+    "bull-arena": "^4.4.1",
+    "bullmq": "^5.7.15",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
