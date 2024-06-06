@@ -6,11 +6,9 @@ import { createInvoice, findAndUpdateInvoice, findInvoice, getInvoices } from '.
 import { BadRequestError, NotFoundError } from '../errors'
 import { StatusCodes } from 'http-status-codes'
 import path from 'path'
-import sendMail from '../utils/mail'
-import generateInvoice from '../utils/generateInvoice'
 import { findUserByEmail } from '../service/auth.service'
 import { isBefore } from 'date-fns'
-import { sendToQueue } from '../queue'
+import { sendToQueue } from '../queue/producer'
 import scheduler from '../jobs/scheduler'
 
 export const createInvoiceController = async (req: Request<{ id: string }, {}, invoiceInput['body']>, res: Response) => {
@@ -171,7 +169,7 @@ export const sendInvoiceToClientController = async (req: Request<{ id: string }>
         invoicePath: path.join(__dirname, '..', 'invoices', `${invoice._id}.pdf`)
     }
 
-    await sendToQueue('invoice', invoiceData)
+    await sendToQueue('invoices', invoiceData)
 
     return res.status(StatusCodes.OK).json({ message: 'The Invoice has been sent to the client' })
 }

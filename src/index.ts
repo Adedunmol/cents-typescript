@@ -13,6 +13,5 @@ mongoose.connection.once('open', () => {
         console.log(`App is listening on port ${PORT}...`)
 
         startMetricsServer()
-        startWorkers()
     })
 })

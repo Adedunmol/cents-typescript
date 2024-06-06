@@ -43,7 +43,7 @@ const invoiceWorker = new Worker('invoices', async job => {
     } catch (err: any) {
         logger.error('error generating invoice from worker', err)
     }
-})
+}) // , { connection: { host: 'localhost', port: 6379 } }
 
 invoiceWorker.on('completed', job => {
     logger.info(`${job.id} has completed`)

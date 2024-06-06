@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { DecodedToken } from '../utils/interfaces';
 import bcrypt from 'bcrypt';
-import { sendToQueue } from "../queue";
+import { sendToQueue } from "../queue/producer";
 import logger from "../utils/logger";
 
 

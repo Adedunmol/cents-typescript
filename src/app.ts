@@ -16,6 +16,10 @@ import emailJobEvents from './events/';
 import { emailData } from './utils/interfaces';
 import { restResponseTimeHistogram } from './utils/metrics';
 import schedule from './jobs/scheduler'
+import { createBullBoard } from '@bull-board/api'
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
+import { ExpressAdapter } from '@bull-board/express'
+import { emailQueue, invoiceQueue } from './queue/producer';
 
 const app = express()
 
@@ -30,6 +34,14 @@ const app = express()
 //     await schedule.dueDateMail(data.invoice._id, data.dueDate)
 // })
 
+export const serverAdapter = new ExpressAdapter()
+
+const bullBoard = createBullBoard({
+    queues: [new BullMQAdapter(emailQueue), new BullMQAdapter(invoiceQueue)],
+    serverAdapter
+})
+
+serverAdapter.setBasePath('/bull-board')
 
 app.set('emailJobEvents', emailJobEvents)
 
@@ -52,6 +64,7 @@ app.use(responseTime((req: Request, res: Response, time: number) => {
 app.use(express.json())
 app.use(cookieParser())
 
+app.use('/bull-board', serverAdapter.getRouter())
 app.get('/', (req: Request, res: Response) => {
     return res.send('hello')
 })
