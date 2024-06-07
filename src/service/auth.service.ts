@@ -11,8 +11,14 @@ export const createUser = async (input: DocumentDefinition<Omit<UserDocument, 'c
         const user = await User.create(input)
 
         return pick(user.toJSON(), ['_id', 'email', 'fullName', 'username'])
-    }catch (e: any) {
-        throw new ConflictError('User already exists')
+    }catch (err: any) {
+        if (err.code && err.code === 11000) {
+            const message = `Duplicate value entered for ${Object.keys(err.keyValue)} field`
+
+            throw new ConflictError(message)
+        }
+
+        throw new InternalServerError('An error occurred on the server')
     }
 }
 

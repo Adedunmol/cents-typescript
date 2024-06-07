@@ -1,5 +1,6 @@
 import Agenda from 'agenda'
 import allDefinitions from './definitions'
+import logger from '../utils/logger'
 
 const agenda = new Agenda({
     name: 'mail queue',
@@ -15,9 +16,9 @@ const agenda = new Agenda({
 agenda
 .on('ready', async () => { 
     await agenda.start()
-    console.log('Agenda has started')
+    logger.info('Agenda has started')
 })
-.on('error', (err) => console.log('Agenda has not started', err))
+.on('error', (err) => logger.error('Agenda has not started', err))
 
 
 //need to create the definitions(jobs) before

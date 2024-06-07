@@ -1,5 +1,6 @@
 import express from 'express';
 import client from 'prom-client';
+import logger from './logger';
 
 const app = express()
 
@@ -29,6 +30,6 @@ export function startMetricsServer() {
     })
     
     app.listen(9100, () => {
-        console.log('Metrics server started at http://localhost:9100'); 
+        logger.info('Metrics server started at http://localhost:9100'); 
     })
 }
