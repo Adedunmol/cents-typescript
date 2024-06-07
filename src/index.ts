@@ -3,7 +3,6 @@ require('dotenv').config()
 import app from "./app";
 import mongoose from "mongoose";
 import { startMetricsServer } from "./utils/metrics";
-import { startWorkers } from "./queue";
 
 const PORT = process.env.PORT || 5000
 

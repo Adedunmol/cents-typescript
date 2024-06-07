@@ -13,13 +13,12 @@ import clientRouter from './routes/client.route';
 import { routeNotFound } from './middlewares/route-not-found';
 import { errorHandler } from './middlewares/error-handler';
 import emailJobEvents from './events/';
-import { emailData } from './utils/interfaces';
 import { restResponseTimeHistogram } from './utils/metrics';
-import schedule from './jobs/scheduler'
 import { createBullBoard } from '@bull-board/api'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 import { ExpressAdapter } from '@bull-board/express'
 import { emailQueue, invoiceQueue } from './queue/producer';
+import * as workers from './queue/worker';
 
 const app = express()
 

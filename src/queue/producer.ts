@@ -1,8 +1,15 @@
-import { Queue } from 'bullmq'
+import { Queue, ConnectionOptions } from 'bullmq'
 import logger from "../utils/logger"
 
-export const emailQueue = new Queue('emails', { connection: { host: 'localhost', port: 6379 } }) // { defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } }
-export const invoiceQueue = new Queue('invoices', { connection: { host: 'localhost', port: 6379 } })
+export const redisOptions: ConnectionOptions = { 
+    username: 'default',
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT),
+    password: process.env.REDIS_PASSWORD,
+}
+
+export const emailQueue = new Queue('emails', { connection: redisOptions }) // { defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } }
+export const invoiceQueue = new Queue('invoices', { connection: redisOptions })
 
 type queueName = 'emails' | 'invoices'
 
@@ -19,4 +26,3 @@ export const sendToQueue = async (queue: queueName, data: any) => {
             break
     }
 }
-
