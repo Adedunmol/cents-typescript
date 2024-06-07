@@ -4,7 +4,6 @@ import supertest from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from '../app';
 import mongoose from 'mongoose';
-import User from '../models/user.model';
 import { loginController, logoutController, refreshTokenController } from '../controllers/auth.controller';
 import { UnauthorizedError } from '../errors';
 import * as queue from '../queue/producer';
