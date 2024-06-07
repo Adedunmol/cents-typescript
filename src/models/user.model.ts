@@ -22,16 +22,19 @@ const userSchema = new Schema({
     username: {
         type: String,
         required: [true, 'Please provide username'],
-        trim: true
+        trim: true,
+        unique: true
     },
     fullName: {
         type: String,
-        required: [true, 'Please provide full name']
+        required: [true, 'Please provide full name'],
+        trim: true
     },
     email: {
         type: String,
         required: [true, 'Please provide email'],
-        unique: true
+        unique: true,
+        trim: true
     },
     password: {
         type: String,
