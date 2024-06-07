@@ -32,7 +32,7 @@ export const registerController = async (req: Request<{}, {}, createUserInput['b
     logger.info(`created user ${user.username}`)
     await sendToQueue('emails', emailData) // send verification mail to user
 
-    return res.status(StatusCodes.CREATED).json({ user })
+    return res.status(StatusCodes.CREATED).json({ status: 'success', message: 'user created successfully', data: user })
     } catch (err: any) {
         return res.status(409).send('user exists')
     }
@@ -84,7 +84,7 @@ export const loginController = async (req: Request<{}, {}, loginUserInput['body'
         const result = await user.save()
 
         res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 15 * 60 * 1000, sameSite: 'none' })
-        return res.status(StatusCodes.OK).json({ accessToken, expiresIn: 15 * 60 * 1000 })
+        return res.status(StatusCodes.OK).json({ status: 'success', message: '', data: { accessToken, expiresIn: 15 * 60 * 1000 }})
     }
 
     throw new UnauthorizedError('Invalid credentials')
@@ -192,7 +192,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 
             res.cookie('jwt', newRefreshToken, {maxAge: 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'none'})
 
-            return res.status(StatusCodes.OK).json({ accessToken, expiresIn: 15 * 60 * 1000 })
+            return res.status(StatusCodes.OK).json({ status: 'success', message: '', data: { accessToken, expiresIn: 15 * 60 * 1000 }})
         }
     )
 }
@@ -269,7 +269,7 @@ export const resetPasswordRequestController = async (req: Request, res: Response
     }
     sendToQueue('emails', emailData) // send verification mail to user
 
-    return res.status(200).json({ status: "success", data: { userId: user.id, email: user.email, otp: '1234' } }) // userOTPVerification.otp
+    return res.status(200).json({ status: "success", message: "otp has been sent to the provided email", data: { userId: user.id, email: user.email, otp: '1234' } }) // userOTPVerification.otp
 
 }
 
@@ -305,5 +305,5 @@ export const resetPasswordController = async (req: Request, res: Response) => {
 
     await deleteUserOtp(user.id)
 
-    return res.status(200).json({ status: "success", message: "Password changed successfully" })
+    return res.status(200).json({ status: "success", message: "Password changed successfully", data: null })
 }
