@@ -7,21 +7,14 @@ import mongoose from 'mongoose';
 import User from '../models/user.model';
 import { loginController, logoutController, refreshTokenController } from '../controllers/auth.controller';
 import { UnauthorizedError } from '../errors';
+import * as queue from '../queue/producer';
+import UserOTPVerification from '../models/user-otp-verification.model';
 
 const userId = new mongoose.Types.ObjectId().toString()
 
-const userPayload = {
-    _id: userId,
-    email: 'nobody@test.com',
-    fullName: 'mr test',
-    roles: {
-        User: 1984
-    },
-    refreshToken: [],
-    save: () => true
-}
 
 const userInput = {
+    username: 'test',
     email: 'nobody@test.com',
     fullName: 'mr test',
     password: 'Password123',
@@ -29,6 +22,19 @@ const userInput = {
     roles: {
         User: 1984
     }
+}
+
+
+const userPayload = {
+    ...userInput,
+    refreshToken: [],
+    save: () => true
+}
+
+const otp = {
+    userId,
+    otp: 'hashedotp',
+    expiresAt: Date.now() + 100000
 }
 
 describe('auth', () => {
@@ -42,6 +48,13 @@ describe('auth', () => {
                     .spyOn(AuthService, 'createUser')
                     // @ts-ignore
                     .mockReturnValueOnce(userPayload)
+                const sendToQueueMock = jest
+                    .spyOn(queue, 'sendToQueue')
+                    .mockResolvedValue()
+                
+                const userOTPMock = jest
+                    .spyOn(UserOTPVerification, 'create')
+                    .mockReturnValueOnce()
 
                 const { statusCode, body } = await supertest(app).post('/api/v1/auth/register').send(userInput)
             
@@ -60,6 +73,9 @@ describe('auth', () => {
                 .spyOn(AuthService, 'createUser')
                 // @ts-ignore
                 .mockReturnValueOnce(userPayload)
+                const sendToQueueMock = jest
+                .spyOn(queue, 'sendToQueue')
+                .mockResolvedValue()
 
             const { statusCode } = await supertest(app).post('/api/v1/auth/register').send({ ...userInput, passwordConfirmation: 'does not match' })
         
@@ -77,6 +93,10 @@ describe('auth', () => {
                     .spyOn(AuthService, 'createUser')
                     .mockRejectedValue('user exists')
 
+                const sendToQueueMock = jest
+                    .spyOn(queue, 'sendToQueue')
+                    .mockResolvedValue()
+
                 const { statusCode } = await supertest(app).post('/api/v1/auth/register').send(userInput)
 
                 expect(statusCode).toBe(409)
@@ -92,7 +112,7 @@ describe('auth', () => {
             
             it('should send a 200', async () => {
                 jest
-                .spyOn(AuthService, 'findUser')
+                .spyOn(AuthService, 'findUserByEmail')
                 // @ts-ignore
                 .mockReturnValue(userPayload)
 
@@ -128,7 +148,7 @@ describe('auth', () => {
 
             it('should send a 401', async () => {
                 jest
-                .spyOn(AuthService, 'findUser')
+                .spyOn(AuthService, 'findUserByEmail')
                 // @ts-ignore
                 .mockReturnValue(userPayload)
 
