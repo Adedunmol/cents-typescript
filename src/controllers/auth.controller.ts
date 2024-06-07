@@ -29,7 +29,7 @@ export const registerController = async (req: Request<{}, {}, createUserInput['b
         to: user.email
     }
 
-    logger.info(`created user ${user.username} with otp ${otp}`)
+    logger.info(`created user ${user.username}`)
     await sendToQueue('emails', emailData) // send verification mail to user
 
     return res.status(StatusCodes.CREATED).json({ user })

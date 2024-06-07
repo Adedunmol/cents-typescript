@@ -1,15 +1,10 @@
-import { Queue, ConnectionOptions } from 'bullmq'
+import './worker'
+import { Queue } from 'bullmq'
 import logger from "../utils/logger"
+import { redisConnOptions } from '.'
 
-export const redisOptions: ConnectionOptions = { 
-    username: 'default',
-    host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
-    password: process.env.REDIS_PASSWORD,
-}
-
-export const emailQueue = new Queue('emails', { connection: redisOptions }) // { defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } }
-export const invoiceQueue = new Queue('invoices', { connection: redisOptions })
+export const emailQueue = new Queue('emails', { connection: redisConnOptions, defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } })
+export const invoiceQueue = new Queue('invoices', { connection: redisConnOptions, defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } })
 
 type queueName = 'emails' | 'invoices'
 
@@ -17,7 +12,7 @@ export const sendToQueue = async (queue: queueName, data: any) => {
 
     switch (queue) {
         case 'emails':
-            logger.info('mail added to queue', data)
+            logger.info('mail added to queue')
             await emailQueue.add('send-mail', data, { attempts: 3, backoff: { type: 'exponential', delay: 1000 } })
             break
         case 'invoices':
