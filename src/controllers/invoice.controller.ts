@@ -34,7 +34,7 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
         throw new BadRequestError('invalid date structure')
     }
 
-    const formattedDueDate = new Date(parseInt(splittedDate.year), parseInt(splittedDate.month) - 1, parseInt(splittedDate.day))
+    const formattedDueDate = new Date(Number(splittedDate.year), Number(splittedDate.month) - 1, Number(splittedDate.day), 19, 40)
 
     if (isNaN(formattedDueDate.getTime())) throw new BadRequestError('Date is not valid')
 

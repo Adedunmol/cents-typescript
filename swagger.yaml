@@ -1,0 +1,11 @@
+openapi: 3.0.0
+info:
+  title: CENTS
+  description: An API for invoice and payment reminding for freelancers.
+  contact: {}
+  version: '1.0'
+servers:
+- url: https://cents-api.herokuapp.com/api/v1
+  variables: {}
+- url: http://example.com
+  variables: {}

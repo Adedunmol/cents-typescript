@@ -18,7 +18,12 @@ import { createBullBoard } from '@bull-board/api'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 import { ExpressAdapter } from '@bull-board/express'
 import { emailQueue, invoiceQueue } from './queue/producer';
-import * as workers from './queue/worker';
+import YAML from 'yamljs';
+import swaggerUI from 'swagger-ui-express';
+import path from 'path';
+
+//@ts-ignore
+import xss from 'xss-clean';
 
 const app = express()
 
@@ -62,7 +67,18 @@ app.use(responseTime((req: Request, res: Response, time: number) => {
 }))
 app.use(express.json())
 app.use(cookieParser())
+app.use(helmet())
+app.use(xss())
 
+const docsPath = path.join(__dirname, '..', 'swagger.yaml')
+const swaggerDocument = YAML.load(docsPath)
+
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument))
+
+app.get('/', (req, res) => {
+    const docs = req.protocol + '://' + req.get('host') + '/api-docs'
+    return res.status(200).json({ status: 'success', message: '', data: { docs } })
+})
 app.use('/bull-board', serverAdapter.getRouter())
 app.get('/', (req: Request, res: Response) => {
     return res.send('hello')

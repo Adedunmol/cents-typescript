@@ -23,7 +23,7 @@ export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boo
 
     const user = await User.findOne({ _id : invoiceData.createdBy }).exec()
 
-    generateInvoice(invoiceData, path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`))
+    await generateInvoice(invoiceData, path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`))
     
     //sending the invoice to the client here
     const subject = `${user?.fullName}'s invoice: Payment due today`
