@@ -5,8 +5,6 @@ import { InvoiceDocument } from "../models/invoice.model"
 import path from 'path'
 import nodemailer from 'nodemailer'
 import logger from "./logger"
-import UserOTPVerification from "../models/user-otp-verification.model"
-import bcrypt from "bcrypt"
 import Email from "email-templates"
 
 interface emailData {
@@ -19,11 +17,13 @@ interface emailData {
 
 const OTP_EXPIRATION = 3600000
 
-export const sendMailWithTemplates = async (template: string, locals: any,  to: string) => {
+export const sendMailWithTemplates = async (template: string, locals: any,  to: string, invoicePath?: string, invoiceId?: string) => {
     try {
+        console.log('from send mail with templates: ', invoicePath)
         const email = new Email({
             message: {
-              from: 'hi@example.com'
+              from: 'hi@example.com',
+              attachments: invoicePath ? [{ path: invoicePath, contentType: 'application/pdf', filename: `${invoiceId}.pdf`}] : []
             },
             send: true,
             preview: false,
@@ -40,7 +40,7 @@ export const sendMailWithTemplates = async (template: string, locals: any,  to: 
         const res = await email.send({ 
             template: path.join(__dirname, '..', 'emails', template), 
             message: { to }, 
-            locals
+            locals,
         })
         logger.info(`email sent to ${to}`)
     } catch (err: any) {

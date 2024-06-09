@@ -6,22 +6,6 @@ import PDFDocument from 'pdfkit'
 import path from 'path'
 import { utcToZonedTime } from "date-fns-tz";
 
-// a and b are javascript Date objects
-function dateDiffInDays(date1: Date, date2: Date) {
-  //Get 1 day in milliseconds
-  var oneDay_ms = 1000 * 60 * 60 * 24;
-
-  // Convert both dates to milliseconds
-  var date1_ms = date1.getTime();
-  var date2_ms = date2.getTime();
-
-  // Calculate the difference in milliseconds
-  var difference_ms = date2_ms - date1_ms;
- 
-  // Convert back to days and return
-  return Math.round(difference_ms/oneDay_ms);
-}
-
 
 async function createInvoice(invoice: DocumentDefinition<InvoiceDocument>, path: string) {
     let doc = new PDFDocument({ margin: 50 })

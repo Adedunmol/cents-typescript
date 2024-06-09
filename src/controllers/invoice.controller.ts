@@ -6,15 +6,14 @@ import { createInvoice, findAndUpdateInvoice, findInvoice, getInvoices } from '.
 import { BadRequestError, NotFoundError } from '../errors'
 import { StatusCodes } from 'http-status-codes'
 import path from 'path'
-import { findUserByEmail } from '../service/auth.service'
+import { findUserByEmail, findUserById } from '../service/auth.service'
 import { isBefore } from 'date-fns'
 import { sendToQueue } from '../queue/producer'
 import scheduler from '../jobs/scheduler'
 import logger from '../utils/logger'
 
 const splitDate = (dateStr: string) => {
-    
-    const pattern = new RegExp("(\d{4})[-/]?(\d{2})[-/]?(\d{2})")
+    const pattern = /(\d{4})[-\/]?(\d{2})[-\/]?(\d{2})/gm
     const dates = dateStr.split(pattern)
 
     if (dates.length < 5) return null
@@ -25,9 +24,8 @@ const splitDate = (dateStr: string) => {
 export const createInvoiceController = async (req: Request<{ id: string }, {}, invoiceInput['body']>, res: Response) => {
     // const emailJobEvents = req.app.get('emailJobEvents')
 
-    const { id: clientId } = req.params
     const createdBy = req.user.id
-    let { services, dueDate } = req.body
+    let { services, dueDate, clientId } = req.body
 
     const splittedDate = splitDate(dueDate)
 
@@ -177,7 +175,7 @@ export const sendInvoiceToClientController = async (req: Request<{ id: string }>
         throw new NotFoundError('No invoice with this id')
     }
 
-    const user = await findUserByEmail(String(invoice.createdBy))
+    const user = await findUserById(String(invoice.createdBy))
 
     if (!user) throw new NotFoundError('no user found with this id')
 

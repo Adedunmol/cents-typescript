@@ -2,9 +2,6 @@ import { DocumentDefinition } from "mongoose"
 import Invoice, { InvoiceDocument } from "../models/invoice.model"
 
 import agenda from "./agendaInstance"
-import logger from "../utils/logger"
-
-
 
 const scheduler = {
     dueDateMail: async (invoice: DocumentDefinition<InvoiceDocument>, date: Date) => {

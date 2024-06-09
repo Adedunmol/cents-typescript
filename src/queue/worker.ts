@@ -32,13 +32,13 @@ const invoiceWorker = new Worker('invoices', async job => {
         console.log(job.data)
         const invoiceData = job.data
 
-        await createInvoice(invoiceData, invoiceData.path)
+        await createInvoice(invoiceData.invoice, invoiceData.invoicePath)
 
         if (invoiceData.sendToEmail) {
-            await sendMailWithTemplates("invoice", invoiceData.invoice, invoiceData.invoice.clientEmail)
+            await sendMailWithTemplates("invoice", invoiceData.invoice, invoiceData.invoice.clientEmail, invoiceData.invoicePath, invoiceData.invoice._id)
         }
 
-        fs.unlink(path.join(__dirname, '..', 'invoices', `${String(invoiceData.invoice._id)}.pdf`), (err: any) => {
+        fs.unlink(invoiceData.invoicePath, (err: any) => { // path.join(__dirname, '..', 'invoices', `${String(invoiceData.invoice._id)}.pdf`)
             if (err) throw new Error(err)
         })
     } catch (err: any) {

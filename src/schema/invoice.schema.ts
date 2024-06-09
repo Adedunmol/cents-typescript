@@ -4,11 +4,12 @@ const serviceSchema = object({
     item: string(),
     rate: number(),
     hours: number(),
-    paid: boolean()
+    paid: boolean().optional()
 })
 
 export const invoiceSchema = object({
     body: object({
+        clientId: string({ required_error: "clientId is required" }),
         services: array(serviceSchema),
         dueDate: string({ required_error: "dueDate is required" }),
         frequency: number({ required_error: "frequency is required" }),

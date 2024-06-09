@@ -27,3 +27,35 @@
     '    at TCP.onStreamRead (node:internal/stream_base_commons:217:20)',
   timestamp: '2024-06-05T09:22:18.335Z'
 }
+{
+  level: 'error',
+  message: "error generating invoice from worker Cannot read properties of undefined (reading 'length')",
+  stack: "TypeError: Cannot read properties of undefined (reading 'length')\n" +
+    '    at generateInvoiceTable (C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:130:38)\n' +
+    '    at C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:31:5\n' +
+    '    at Generator.next (<anonymous>)\n' +
+    '    at C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:8:71\n' +
+    '    at new Promise (<anonymous>)\n' +
+    '    at __awaiter (C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:4:12)\n' +
+    '    at createInvoice (C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:32:12)\n' +
+    '    at C:\\Users\\USER\\cents-typescript\\src\\queue\\worker.ts:35:28\n' +
+    '    at Generator.next (<anonymous>)\n' +
+    '    at C:\\Users\\USER\\cents-typescript\\src\\queue\\worker.ts:8:71',
+  timestamp: '2024-06-09T16:34:36.324Z'
+}
+{
+  code: 'ERR_INVALID_ARG_TYPE',
+  level: 'error',
+  message: 'error generating invoice from worker The "path" argument must be of type string or an instance of Buffer or URL. Received undefined',
+  stack: 'TypeError: The "path" argument must be of type string or an instance of Buffer or URL. Received undefined\n' +
+    '    at new WriteStream (node:internal/fs/streams:340:5)\n' +
+    '    at Object.createWriteStream (node:fs:3123:10)\n' +
+    '    at C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:19:17\n' +
+    '    at Generator.next (<anonymous>)\n' +
+    '    at C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:8:71\n' +
+    '    at new Promise (<anonymous>)\n' +
+    '    at __awaiter (C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:4:12)\n' +
+    '    at createInvoice (C:\\Users\\USER\\cents-typescript\\src\\utils\\generateInvoice.ts:20:12)\n' +
+    '    at C:\\Users\\USER\\cents-typescript\\src\\queue\\worker.ts:35:28',
+  timestamp: '2024-06-09T16:38:56.328Z'
+}

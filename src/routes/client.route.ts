@@ -10,7 +10,6 @@ const router = express.Router()
 
 router.route('/').get(getAllClientsController).post(validateResource(clientSchema), createClientController)
 router.route('/:id').get(getClientController).delete(deleteClientController).patch(validateResource(updateClientSchema), updateClientController)
-router.route('/:id/invoices').post(validateResource(invoiceSchema), createInvoiceController).get(getClientInvoicesController)
 router.route('/:id/invoices/:invoiceId').get(getInvoiceController).patch(updateInvoiceController)
 
 export default router
