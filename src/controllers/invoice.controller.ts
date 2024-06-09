@@ -10,6 +10,17 @@ import { findUserByEmail } from '../service/auth.service'
 import { isBefore } from 'date-fns'
 import { sendToQueue } from '../queue/producer'
 import scheduler from '../jobs/scheduler'
+import logger from '../utils/logger'
+
+const splitDate = (dateStr: string) => {
+    
+    const pattern = new RegExp("(\d{4})[-/]?(\d{2})[-/]?(\d{2})")
+    const dates = dateStr.split(pattern)
+
+    if (dates.length < 5) return null
+
+    return { year: dates[1], month: dates[2], day: dates[3] }
+}
 
 export const createInvoiceController = async (req: Request<{ id: string }, {}, invoiceInput['body']>, res: Response) => {
     // const emailJobEvents = req.app.get('emailJobEvents')
@@ -18,12 +29,19 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
     const createdBy = req.user.id
     let { services, dueDate } = req.body
 
-    const newDueDate = new Date(dueDate)
+    const splittedDate = splitDate(dueDate)
 
-    if (isNaN(newDueDate.getTime())) throw new BadRequestError('Date is not valid')
+    if (!splittedDate) {
+        logger.info('early return due to invalid date')
+        throw new BadRequestError('invalid date structure')
+    }
+
+    const formattedDueDate = new Date(parseInt(splittedDate.year), parseInt(splittedDate.month) - 1, parseInt(splittedDate.day))
+
+    if (isNaN(formattedDueDate.getTime())) throw new BadRequestError('Date is not valid')
 
     // first date (due date) has to be greater than or equal to the current date
-    if (isBefore(newDueDate, new Date())) throw new BadRequestError('The due date can\'t be before the current date, try a future date.')
+    if (isBefore(formattedDueDate, new Date())) throw new BadRequestError('The due date can\'t be before the current date, try a future date.')
 
     if (!clientId) {
         throw new BadRequestError('ClientId is not included with url')
@@ -51,7 +69,7 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
 
     const invoice = await createInvoice(invoiceObj)
     //mailScheduleOnDueDate(invoice, dueDate)
-    scheduler.dueDateMail(invoice, dueDate)
+    await scheduler.dueDateMail(invoice, formattedDueDate)
     // emailJobEvents.emit('dueMail', { invoice, dueDate })
     // sendToQueue("invoices", invoice)
 
