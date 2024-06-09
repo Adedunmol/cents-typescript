@@ -8,6 +8,9 @@ import { loginController, logoutController, refreshTokenController } from '../co
 import { UnauthorizedError } from '../errors';
 import * as queue from '../queue/producer';
 import UserOTPVerification from '../models/user-otp-verification.model';
+import bcrypt, { compare } from 'bcrypt';
+
+const bcryptMock = { compare }
 
 const userId = new mongoose.Types.ObjectId().toString()
 
@@ -279,6 +282,367 @@ describe('auth', () => {
 
                 // @ts-ignore
                 expect(() => refreshTokenController(req, res)).rejects.toThrow()
+            })
+        })
+    })
+    
+    describe('verify-otp route', () => {
+
+        describe('given no otp found for user', () => {
+
+            it('should throw a bad request error', async () => {
+
+                const data = { userId, otp: "1235" }
+
+                jest
+                .spyOn(UserOTPVerification, 'find')
+                .mockResolvedValue([])
+
+                jest
+                .spyOn(AuthService, 'deleteUserOtp')
+                .mockResolvedValue({} as any)
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/verify-otp').send(data)
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given no user details sent', () => {
+
+            it('should throw a bad request error', async () => {
+                
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/verify-otp')
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given the otp has expired', () => {
+
+            it('should throw a bad request error', async () => {
+
+                jest
+                .spyOn(UserOTPVerification, 'find')
+                .mockResolvedValue([{ expiresAt: Date.now() - 10, otp: "hashedOtp" }])
+
+                jest
+                .spyOn(AuthService, 'deleteUserOtp')
+                .mockResolvedValue({} as any)
+
+                const data = { userId, otp: "1235" }
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/verify-otp').send(data)
+
+                expect(statusCode).toBe(400)                
+            })
+        })
+
+        describe('given the otp is not valid', () => {
+
+            it('should throw a bad request error', async () => {
+
+                jest
+                .spyOn(UserOTPVerification, 'find')
+                .mockResolvedValue([{ expiresAt: Date.now() + 1000, otp: 'hashedOtp' }])
+
+                jest
+                .spyOn(bcryptMock, 'compare')
+                .mockImplementation((plain, hash) => Promise.resolve(false))
+
+                const data = { userId, otp: "1235" }
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/verify-otp').send(data)
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given the otp is valid', () => {
+
+            it('should return a success', async () => {
+
+                jest.clearAllMocks()
+
+                const payload = {
+                    userId,
+                    ...userInput,
+                    otp: '1234'
+                }
+                const userOTPVerification = {
+                    userId,
+                    expiresAt: Date.now() + 100000,
+                    otp: bcrypt.hashSync(payload.otp, 10)
+                }
+
+                jest
+                .spyOn(AuthService, 'findUserWithOtp')
+                .mockResolvedValue([userOTPVerification] as any[])
+
+                jest
+                .spyOn(bcryptMock, 'compare')
+                .mockImplementation((plain, hash) => Promise.resolve(true))
+
+                jest
+                .spyOn(AuthService, 'updateUserVerification')
+                .mockResolvedValue(userPayload)
+
+                jest
+                .spyOn(AuthService, 'deleteUserOtp')
+                .mockResolvedValue({} as any)
+
+                const { statusCode, body } = await supertest(app).post('/api/v2/auth/verify-otp').send(payload)
+
+                expect(statusCode).toBe(200)                
+            })
+        })
+    })
+
+    describe('resend otp route', () => {
+
+        describe('given user details not sent', ()=> {
+
+            it('should throw a bad request error', async () => {
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/resend-otp')
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given user details', ()=> {
+
+            it('should return a success', async () => {
+
+                jest
+                .spyOn(AuthService, 'generateOtp')
+                .mockResolvedValue('1234')
+
+                jest
+                .spyOn(AuthService, 'deleteUserOtp')
+                .mockResolvedValue({} as any)
+
+                const sendToQueueMock = jest
+                .spyOn(queue, 'sendToQueue')
+                .mockResolvedValue()
+
+                const payload = {
+                    userId,
+                    ...userInput
+                }
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/resend-otp').send(payload)
+
+                expect(statusCode).toBe(200)
+            })
+        })
+    })
+
+    describe('forgot password route', () => {
+
+        describe('given no user exists with the email given', () => {
+
+            it('should throw a bad request error', async () => {
+               
+                jest.spyOn(AuthService, 'findUserByEmail')
+                // @ts-ignore
+                .mockReturnValue(null)
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/forgot-password').send(userInput)
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given empty payload sent', () => {
+
+            it('should return a 400', async () => {
+               
+                jest.spyOn(AuthService, 'findUserByEmail')
+                // @ts-ignore
+                .mockReturnValue(null)
+
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/forgot-password').send({})
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given user not verified', () => {
+
+            it('should return a 400', async () => {
+                const payload = {
+                    ...userPayload,
+                    verified: false
+                }
+               
+                jest.spyOn(AuthService, 'findUserByEmail')
+                // @ts-ignore
+                .mockReturnValue(null)
+
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/forgot-password').send(userInput)
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given valid data', () => {
+
+            it('should return a 200', async () => {
+               
+                const userOTPVerification = {
+                    userId,
+                    expiresAt: Date.now() + 100,
+                    otp: 'somerandomhash'
+                }
+
+                jest
+                .spyOn(AuthService, 'generateOtp')
+                .mockResolvedValue('1234')
+
+                jest.spyOn(AuthService, 'findUserByEmail')
+                // @ts-ignore
+                .mockReturnValue(userPayload)
+
+                jest
+                .spyOn(AuthService, 'deleteUserOtp')
+                .mockResolvedValue({} as any)
+
+                const sendToQueueMock = jest
+                .spyOn(queue, 'sendToQueue')
+                .mockResolvedValue()
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/forgot-password').send(userInput)
+
+                expect(statusCode).toBe(200)
+            })
+        })
+    })
+
+    
+    describe('reset password route', () => {
+
+        describe('given no user exists with the email given', () => {
+
+            it('should throw a bad request error', async () => {
+               
+                jest.spyOn(AuthService, 'findUserByEmail')
+                // @ts-ignore
+                .mockReturnValue(null)
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/reset').send(userInput)
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given empty payload sent', () => {
+
+            it('should throw a bad request error', async () => {
+               
+                jest.spyOn(AuthService, 'findUserByEmail')
+                // @ts-ignore
+                .mockReturnValue(null)
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/reset').send({})
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given otp sent to user not found', ()=> {
+
+            it('should throw a bad request error', async () => {
+                const data = { userId, otp: "1235" }
+
+                jest
+                .spyOn(AuthService, 'findUserWithOtp')
+                .mockResolvedValue([])
+
+                jest
+                .spyOn(AuthService, 'deleteUserOtp')
+                .mockResolvedValue({} as any)
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/reset').send(data)
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given otp sent has expired', ()=> {
+
+            it('should return a 400', async () => {
+                jest
+                .spyOn(AuthService, 'findUserWithOtp')
+                .mockResolvedValue([{ expiresAt: Date.now() - 10, otp: "hashedOtp" }] as any[])
+
+                jest
+                .spyOn(AuthService, 'deleteUserOtp')
+                .mockResolvedValue({} as any)
+
+                const data = { userId, otp: "1235" }
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/reset').send(data)
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given an invalid otp', ()=> {
+
+            it('should throw a bad request error', async () => {
+                jest
+                .spyOn(AuthService, 'findUserWithOtp')
+                .mockResolvedValue([{ expiresAt: Date.now() + 1000, otp: 'hashedOtp' }] as any[])
+
+                jest
+                .spyOn(bcryptMock, 'compare')
+                .mockImplementation((plain, hash) => Promise.resolve(false))
+
+                const data = { userId, otp: "1235" }
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/reset').send(data)
+
+                expect(statusCode).toBe(400)
+            })
+        })
+
+        describe('given valid data', () => {
+
+            it('should return a success', async () => {
+               
+                const payload = {
+                    userId,
+                    ...userInput,
+                    otp: '1234'
+                }
+                const userOTPVerification = {
+                    userId,
+                    expiresAt: Date.now() + 100000,
+                    otp: bcrypt.hashSync(payload.otp, 10)
+                }
+
+                jest.spyOn(AuthService, 'findUserByEmail')
+                // @ts-ignore
+                .mockReturnValue(userPayload)
+
+                jest
+                .spyOn(AuthService, 'deleteUserOtp')
+                .mockResolvedValue({} as any)
+
+                jest
+                .spyOn(UserOTPVerification, 'find')
+                .mockResolvedValue([userOTPVerification])
+
+                // jest
+                // .spyOn(bcryptMock, 'compare')
+                // .mockImplementation((plain, hash) => Promise.resolve(true))
+
+                const { statusCode, body } = await supertest(app).post('/api/v1/auth/reset').send(payload)
+
+                expect(statusCode).toBe(200)
             })
         })
     })

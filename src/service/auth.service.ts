@@ -64,7 +64,9 @@ export const validatePassword = async ({ password, email }: { email: string, pas
 
 export const findUserWithOtp = async (userId: string) => {
     try {
-        return await UserOTPVerification.find({ userId })
+        const otp = await UserOTPVerification.find({ userId })
+
+        return otp
     } catch (err: any) {
         throw new NotFoundError(err)
     }
@@ -80,7 +82,9 @@ export const deleteUserOtp = async (userId: string) => {
 
 export const updateUserVerification = async (userId: string) => {
     try {
-        return await User.findOneAndUpdate({ _id: userId }, { verified: true }, { new: true })
+        const user = await User.findOneAndUpdate({ _id: userId }, { verified: true }, { new: true })
+
+        return user?.toJSON()
     } catch (err: any) {
         throw new NotFoundError(err)
     }

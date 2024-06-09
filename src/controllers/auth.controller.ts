@@ -267,7 +267,7 @@ export const resetPasswordRequestController = async (req: Request, res: Response
         locals: { otp },
         to: user.email
     }
-    sendToQueue('emails', emailData) // send verification mail to user
+    await sendToQueue('emails', emailData) // send verification mail to user
 
     return res.status(200).json({ status: "success", message: "otp has been sent to the provided email", data: { userId: user.id, email: user.email, otp: '1234' } }) // userOTPVerification.otp
 
