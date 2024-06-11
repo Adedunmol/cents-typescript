@@ -100,7 +100,7 @@ export const getInvoiceController = async (req: Request, res: Response) => {
 
 
 export const getClientInvoicesController = async (req: Request, res: Response) => {
-    const { id: clientId } = req.params
+    const { clientId } = req.params
     const createdBy = req.user.id
 
 
@@ -154,9 +154,9 @@ export const updateInvoiceController = async (req: Request, res: Response) => {
         throw new NotFoundError('No invoice found with this id')
     }
 
-    const result = await invoice.save()
+    // const result = await invoice.save()
 
-    return res.status(StatusCodes.OK).json({ invoice: result })
+    return res.status(StatusCodes.OK).json({ invoice })
 }
 
 

@@ -295,7 +295,7 @@ describe('auth', () => {
                 const data = { userId, otp: "1235" }
 
                 jest
-                .spyOn(UserOTPVerification, 'find')
+                .spyOn(AuthService, 'findUserWithOtp')
                 .mockResolvedValue([])
 
                 jest
@@ -323,7 +323,8 @@ describe('auth', () => {
             it('should throw a bad request error', async () => {
 
                 jest
-                .spyOn(UserOTPVerification, 'find')
+                .spyOn(AuthService, 'findUserWithOtp')
+                // @ts-ignore
                 .mockResolvedValue([{ expiresAt: Date.now() - 10, otp: "hashedOtp" }])
 
                 jest
@@ -343,7 +344,8 @@ describe('auth', () => {
             it('should throw a bad request error', async () => {
 
                 jest
-                .spyOn(UserOTPVerification, 'find')
+                .spyOn(AuthService, 'findUserWithOtp')
+                // @ts-ignore
                 .mockResolvedValue([{ expiresAt: Date.now() + 1000, otp: 'hashedOtp' }])
 
                 jest

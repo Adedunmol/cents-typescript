@@ -56,8 +56,8 @@ export const deleteClientController = async (req: Request, res: Response) => {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'No client with this Id' })
     }
 
-    const invoices = await deleteInvoices({ createdBy, createdFor: clientID })
-    const client = await deleteClient({ createdBy, _id: clientID })
+    const invoices = await deleteInvoices({ $and: [{ createdBy }, { createdFor: clientID}] })
+    const client = await deleteClient({ $and: [{ createdBy }, { _id: clientID }] })
 
     return res.status(StatusCodes.OK).json({ message: 'Client has been deleted' })
 }

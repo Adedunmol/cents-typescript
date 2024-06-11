@@ -12,6 +12,6 @@ router.route('/logout').get(logoutController)
 router.route("/verify-otp").post(validateResource(verifyOTPSchema), verifyOtpController)
 router.route("/resend-otp").post(validateResource(resendOTPSchema), resendOTPController)
 router.route("/forgot-password").post(validateResource(forgotPasswordSchema), resetPasswordRequestController)
-router.route("/reset").post(validateResource(resetPasswordSchema), resetPasswordController)
+router.route("/reset").patch(validateResource(resetPasswordSchema), resetPasswordController)
 
 export default router;
