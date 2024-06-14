@@ -9,3 +9,363 @@ servers:
   variables: {}
 - url: http://example.com
   variables: {}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+tags:
+  - name: Auth
+  - name: Client
+  - name: Invoices
+paths:
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                fullName: Oyewale Adedunmola
+                username: Adedunmola
+                email: oyewaleadedunmola@gmail.com
+                password: password
+                passwordConfirmation: password
+                roles:
+                  User: 1984
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: oyewaleadedunmola@gmail.com
+                password: testing2
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/resend-otp:
+    post:
+      tags:
+        - Auth
+      summary: Resend OTP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                userId: 666348c5033e354c247c5696
+                email: oyewaleadedunmola@gmail.com
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/verify-otp:
+    post:
+      tags:
+        - Auth
+      summary: Verify OTP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                userId: 666348c5033e354c247c5696
+                otp: '2408'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/refresh-token:
+    get:
+      tags:
+        - Auth
+      summary: Get New Access Token
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/logout:
+    get:
+      tags:
+        - Auth
+      summary: Logout User
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/forgot-password:
+    post:
+      tags:
+        - Auth
+      summary: Forgot Password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: oyewaleadedunmola@gmail.com
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/reset:
+    patch:
+      tags:
+        - Auth
+      summary: Reset Password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: oyewaleadedunmola@gmail.com
+                otp: '8842'
+                password: testing2
+                passwordConfirmation: testing2
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/clients/:
+    post:
+      tags:
+        - Client
+      summary: Create New Client
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                fullName: Adedunmola Oyewale
+                email: dumex672@gmail.com
+                phoneNumber: '07062357871'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Client
+      summary: Get All User's Clients
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/invoices/{invoiceId}/send:
+    post:
+      tags:
+        - Invoices
+      parameters:
+        - in: path
+          name: invoiceId   # Note the name is the same as in the path
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: Id of the invoice to be sent to the client
+      summary: Send Invoice to Client
+      requestBody:
+        content: {}
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/clients/{clientId}:
+    parameters:
+    - in: path
+      name: clientId   # Note the name is the same as in the path
+      required: true
+      schema:
+          type: string
+          minimum: 1
+      description: Id of the client
+    patch:
+      tags:
+        - Client
+      summary: Update A Client's Details
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                phoneNumber: '07012345678'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Client
+      summary: Delete A Client
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Client
+      summary: Get A Client
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/clients/{clientId}/invoices/{invoiceId}:
+    parameters:
+    - in: path
+      name: clientId   # Note the name is the same as in the path
+      required: true
+      schema:
+        type: string
+        minimum: 1
+      description: Id of the client
+    - in: path
+      name: invoiceId   # Note the name is the same as in the path
+      required: true
+      schema:
+        type: string
+        minimum: 1
+      description: Id of the invoice
+    get:
+      tags:
+        - Client
+      summary: Get A Client's Invoice
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    patch:
+      tags:
+        - Client
+      summary: Update A Client's Invoice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                fullyPaid: true
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/invoices/:
+    post:
+      tags:
+        - Invoices
+      summary: Create New Invoice For Client
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                clientId: 6665d2168d596f5286e48a54
+                dueDate: 2024/07/09
+                frequency: 3
+                interval: day
+                services:
+                  - item: random
+                    rate: 20
+                    hours: 4
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/invoices:
+    get:
+      tags:
+        - Invoices
+      summary: Get All User's Invoices
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/invoices/{clientId}:
+    parameters:
+    - in: path
+      name: clientId   # Note the name is the same as in the path
+      required: true
+      schema:
+        type: string
+        minimum: 1
+      description: Id of the client
+    get:
+      tags:
+        - Invoices
+      summary: Get A Client's Invoices
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /:
+    get:
+      tags:
+        - default
+      summary: Home
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
