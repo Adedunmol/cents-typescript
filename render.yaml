@@ -7,15 +7,15 @@ services:
     startCommand: npm run start:prod
     envVars:
       - key: DATABASE_URI
-        value: mongodb+srv://cents-manager:password1234@cluster0.ljtuu3v.mongodb.net/cents?retryWrites=true&w=majority&appName=Cluster0
+        sync: false
       - key: ACCESS_TOKEN_SECRET
-        value: PUyZL7dKW8d2uipRkjlY2AMTUxVYJf
+        sync: false
       - key: REFRESH_TOKEN_SECRET
-        value: FzFPyy54mxNUJ6UamKzTYuMt5QTCHi
+        sync: false
       - key: MAILTRAP_USERNAME
-        value: dabb1c175d758c
+        sync: false
       - key: MAILTRAP_PASSWORD
-        value: 89268362f7c1e9
+        sync: false
       - key: ENVIRONMENT
         value: production
       - key: REDIS_URL
@@ -27,3 +27,4 @@ services:
   - type: redis
     name: cents-prod-redis
     ipAllowList: []
+    maxmemoryPolicy: noeviction
