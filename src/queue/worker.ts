@@ -4,7 +4,7 @@ import { sendMailWithTemplates } from "../utils/mail";
 import createInvoice from "../utils/generateInvoice";
 import path from "path"
 import fs from "fs"
-import { redisConnOptions } from '.';
+import { redisConnOptions, connection } from '.';
 
 const emailWorker = new Worker('emails', async job => {
     try {
@@ -16,7 +16,7 @@ const emailWorker = new Worker('emails', async job => {
     } catch (err: any) {
         logger.error('error sending mail from worker', err)
     }
-}, { connection: redisConnOptions})
+}, { connection })
 
 emailWorker.on('completed', job => {
     logger.info(`${job.id} has completed`)
@@ -44,7 +44,7 @@ const invoiceWorker = new Worker('invoices', async job => {
     } catch (err: any) {
         logger.error('error generating invoice from worker', err)
     }
-}, { connection: redisConnOptions}) // , { connection: { host: 'localhost', port: 6379 } }
+}, { connection }) // , { connection: { host: 'localhost', port: 6379 } }
 
 invoiceWorker.on('completed', job => {
     logger.info(`${job.id} has completed`)
