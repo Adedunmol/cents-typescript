@@ -35,7 +35,7 @@ const invoiceWorker = new Worker('invoices', async job => {
         await createInvoice(invoiceData.invoice, invoiceData.invoicePath)
 
         if (invoiceData.sendToEmail) {
-            await sendMailWithTemplates("invoice", invoiceData.invoice, invoiceData.invoice.clientEmail, invoiceData.invoicePath, invoiceData.invoice._id)
+            await sendMailWithTemplates("invoice", { invoice: invoiceData.invoice, dueDate: invoiceData.dueDate }, invoiceData.invoice.clientEmail, invoiceData.invoicePath, invoiceData.invoice._id)
         }
 
         fs.unlink(invoiceData.invoicePath, (err: any) => { // path.join(__dirname, '..', 'invoices', `${String(invoiceData.invoice._id)}.pdf`)

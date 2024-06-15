@@ -3,9 +3,10 @@ import fs from 'fs'
 import Invoice from '../models/invoice.model'
 import User from '../models/user.model'
 import generateInvoice from '../utils/generateInvoice'
-import sendMail from '../utils/mail'
+import sendMail, { sendMailWithTemplates } from '../utils/mail'
 import emailJobEvents from '../events'
 import agenda from './agendaInstance'
+import { formatDistance } from 'date-fns'
 
 
 export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boolean) => {
@@ -23,21 +24,22 @@ export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boo
 
     const user = await User.findOne({ _id : invoiceData.createdBy }).exec()
 
-    await generateInvoice(invoiceData, path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`))
+    const invoicePath = path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`)
+    await generateInvoice(invoiceData, invoicePath)
     
+    const dueDate = formatDistance(new Date(invoiceData.dueDate), Date.now(), { addSuffix: true })
+
     //sending the invoice to the client here
-    const subject = `${user?.fullName}'s invoice: Payment due today`
-    const text = `Please check the invoice below:`
-    // await sendMail(invoiceData.clientEmail, subject, text, 'invoice.hbs', invoiceData)
+    await sendMailWithTemplates("invoice", { id: invoiceData.id, ...invoiceData.toJSON(), dueDate }, invoiceData.clientEmail, invoicePath, invoiceData.id)
 
     //the invoice pdf is to be deleted from the invoices directory after sending to the client
-    const filePath = path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`)
+    // const filePath = path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`)
     
-    fs.unlink(filePath, (err: any) => {
+    fs.unlink(invoicePath, (err: any) => {
         if (err) throw err
         console.log('file has been deleted')
     })
 
-    if (recurrent) emailJobEvents.emit('send-reminder-mails', invoiceId)
+    // if (recurrent) emailJobEvents.emit('send-reminder-mails', invoiceId)
 
 }

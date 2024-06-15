@@ -34,7 +34,7 @@ function generateHeader(doc: any) {
 
 
 function generateFooter(doc: any, invoice: DocumentDefinition<InvoiceDocument>) {
-    const dueDate = utcToZonedTime(invoice.dueDate, 'Europe/Paris')
+    const dueDate = utcToZonedTime(invoice.dueDate, 'Europe/Paris', { addSuffix: true })
     doc.fontSize(
         10
     ).text(

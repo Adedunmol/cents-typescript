@@ -30,6 +30,6 @@ export function startMetricsServer() {
     })
     
     app.listen(9100, () => {
-        logger.info('Metrics server started at http://localhost:9100'); 
+        logger.info(`Metrics server started on port 9100`); 
     })
 }

@@ -7,7 +7,7 @@ import { BadRequestError, NotFoundError } from '../errors'
 import { StatusCodes } from 'http-status-codes'
 import path from 'path'
 import { findUserByEmail, findUserById } from '../service/auth.service'
-import { isBefore } from 'date-fns'
+import { formatDistance, isBefore } from 'date-fns'
 import { sendToQueue } from '../queue/producer'
 import scheduler from '../jobs/scheduler'
 import logger from '../utils/logger'
@@ -34,7 +34,10 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
         throw new BadRequestError('invalid date structure')
     }
 
-    const formattedDueDate = new Date(Number(splittedDate.year), Number(splittedDate.month) - 1, Number(splittedDate.day), 19, 40)
+    const formattedDueDate = new Date(Number(splittedDate.year), Number(splittedDate.month) - 1, Number(splittedDate.day))
+
+    console.log('due date: ', formattedDueDate)
+    console.log('current date: ', new Date())
 
     if (isNaN(formattedDueDate.getTime())) throw new BadRequestError('Date is not valid')
 
@@ -57,6 +60,7 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
 
     const invoiceObj = { 
         ...req.body, 
+        dueDate: formattedDueDate,
         createdBy, 
         createdFor: clientId, 
         total, 
@@ -179,10 +183,13 @@ export const sendInvoiceToClientController = async (req: Request<{ id: string }>
 
     if (!user) throw new NotFoundError('no user found with this id')
 
+    const dueDate = formatDistance(new Date(invoice.dueDate), Date.now(), { addSuffix: true })
+
     const invoiceData = {
         sendToEmail: true,
         invoice,
-        invoicePath: path.join(__dirname, '..', 'invoices', `${invoice._id}.pdf`)
+        invoicePath: path.join(__dirname, '..', 'invoices', `${invoice._id}.pdf`),
+        dueDate
     }
 
     await sendToQueue('invoices', invoiceData)
