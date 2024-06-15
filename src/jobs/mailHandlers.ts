@@ -7,6 +7,7 @@ import sendMail, { sendMailWithTemplates } from '../utils/mail'
 import emailJobEvents from '../events'
 import agenda from './agendaInstance'
 import { formatDistance } from 'date-fns'
+import scheduler from './scheduler'
 
 
 export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boolean) => {
@@ -32,14 +33,12 @@ export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boo
     //sending the invoice to the client here
     await sendMailWithTemplates("invoice", { id: invoiceData.id, ...invoiceData.toJSON(), dueDate }, invoiceData.clientEmail, invoicePath, invoiceData.id)
 
-    //the invoice pdf is to be deleted from the invoices directory after sending to the client
-    // const filePath = path.join(__dirname, '..', 'invoices', `${invoiceData._id}.pdf`)
-    
+    //the invoice pdf is to be deleted from the invoices directory after sending to the client    
     fs.unlink(invoicePath, (err: any) => {
         if (err) throw err
         console.log('file has been deleted')
     })
 
     // if (recurrent) emailJobEvents.emit('send-reminder-mails', invoiceId)
-
+    await scheduler.reminderMails(invoiceData.id)
 }
