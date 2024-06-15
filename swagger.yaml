@@ -5,9 +5,7 @@ info:
   contact: {}
   version: '1.0'
 servers:
-- url: https://cents-api.herokuapp.com/api/v1
-  variables: {}
-- url: http://example.com
+- url: https://cents-0ium.onrender.com
   variables: {}
 components:
   securitySchemes:
