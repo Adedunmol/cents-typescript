@@ -7,4 +7,4 @@ export const redisConnOptions: ConnectionOptions = {
     password: ''// process.env.REDIS_PASSWORD,
 }
 
-export const connection = process.env.ENVIRONMENT === 'production' ? new Redis(process.env.REDIS_URL!!) : redisConnOptions
+export const connection = process.env.ENVIRONMENT === 'production' ? new Redis(process.env.REDIS_URL!!, { maxRetriesPerRequest: null }) : redisConnOptions
