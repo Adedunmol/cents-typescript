@@ -18,6 +18,12 @@ services:
         value: 89268362f7c1e9
       - key: ENVIRONMENT
         value: production
+      - key: REDIS_URL
+        fromService:
+          name: cents-prod-redis
+          type: redis
+          property: connectionString
 
   - type: redis
     name: cents-prod-redis
+    ipAllowList: []
