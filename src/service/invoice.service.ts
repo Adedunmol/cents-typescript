@@ -2,7 +2,7 @@ import { DocumentDefinition, FilterQuery, UpdateQuery } from "mongoose";
 import Invoice, { InvoiceDocument } from "../models/invoice.model";
 
 
-export const createInvoice = async (input: DocumentDefinition<Omit<InvoiceDocument, 'createdAt' | 'updatedAt' | 'fullyPaid'>>) => {
+export const createInvoice = async (input: DocumentDefinition<Omit<InvoiceDocument, 'createdAt' | 'updatedAt' | 'fullyPaid' | 'recurrent'>>) => {
     try {
         return await Invoice.create(input)
     }catch (err: any) {

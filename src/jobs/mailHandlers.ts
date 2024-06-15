@@ -40,5 +40,12 @@ export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boo
     })
 
     // if (recurrent) emailJobEvents.emit('send-reminder-mails', invoiceId)
-    await scheduler.reminderMails(invoiceData.id)
+    if (!invoiceData.recurrent) {
+        // if the current invoice has not been sscheduled for recurrent mails
+        await scheduler.reminderMails(invoiceData.id)
+
+        invoiceData.recurrent = true
+
+        await invoiceData.save()
+    }
 }

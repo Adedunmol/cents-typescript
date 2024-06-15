@@ -19,6 +19,7 @@ export interface InvoiceDocument extends Document {
     createdFor: mongoose.Types.ObjectId;
     frequency: number;
     interval: string;
+    recurrent: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -70,6 +71,10 @@ const invoiceSchema = new Schema({
         type: String,
         required: [true, 'Please provide interval'],
         enum: ['day', 'week', 'month']
+    },
+    recurrent: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
