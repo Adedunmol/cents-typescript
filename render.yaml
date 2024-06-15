@@ -1,0 +1,23 @@
+services:
+  - type: web
+    env: node
+    name: cents-prod-backend
+    repo: https://github.com/Adedunmol/cents-typescript.git
+    buildCommand: npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: DATABASE_URI
+        value: mongodb+srv://cents-manager:password1234@cluster0.ljtuu3v.mongodb.net/cents?retryWrites=true&w=majority&appName=Cluster0
+      - key: ACCESS_TOKEN_SECRET
+        value: PUyZL7dKW8d2uipRkjlY2AMTUxVYJf
+      - key: REFRESH_TOKEN_SECRET
+        value: FzFPyy54mxNUJ6UamKzTYuMt5QTCHi
+      - key: MAILTRAP_USERNAME
+        value: dabb1c175d758c
+      - key: MAILTRAP_PASSWORD
+        value: 89268362f7c1e9
+      - key: ENVIRONMENT
+        value: production
+
+  - type: redis
+    name: cents-prod-redis

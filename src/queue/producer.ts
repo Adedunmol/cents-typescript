@@ -1,10 +1,10 @@
 import './worker'
 import { Queue } from 'bullmq'
 import logger from "../utils/logger"
-import { redisConnOptions } from '.'
+import { redisConnOptions, connection } from '.'
 
-export const emailQueue = new Queue('emails', { connection: redisConnOptions, defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } })
-export const invoiceQueue = new Queue('invoices', { connection: redisConnOptions, defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } })
+export const emailQueue = new Queue('emails', { connection, defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } }) // : redisConnOptions,
+export const invoiceQueue = new Queue('invoices', { connection, defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 1000 } } }) // : redisConnOptions,
 
 type queueName = 'emails' | 'invoices'
 
