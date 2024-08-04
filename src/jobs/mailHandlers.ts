@@ -3,16 +3,16 @@ import fs from 'fs'
 import Invoice from '../models/invoice.model'
 import User from '../models/user.model'
 import generateInvoice from '../utils/generateInvoice'
-import sendMail, { sendMailWithTemplates } from '../utils/mail'
-import emailJobEvents from '../events'
+import { sendMailWithTemplates } from '../utils/mail'
 import agenda from './agendaInstance'
 import { formatDistance } from 'date-fns'
 import scheduler from './scheduler'
+import logger from '../utils/logger'
 
 
-export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boolean) => {
+export const sendReminderMailsHandler = async (invoiceId: string) => {
     const invoiceData = await Invoice.findOne({ _id: invoiceId }).exec()
-        
+
     if (!invoiceData || invoiceData.fullyPaid) {
 
         if (!invoiceData) return;
@@ -39,13 +39,16 @@ export const sendReminderMailsHandler = async (invoiceId: string, recurrent: boo
         console.log('file has been deleted')
     })
 
-    // if (recurrent) emailJobEvents.emit('send-reminder-mails', invoiceId)
     if (!invoiceData.recurrent) {
-        // if the current invoice has not been sscheduled for recurrent mails
+        logger.info(`setting up recurrent mails for ${invoiceData.id}`)
+        // if the current invoice has not been scheduled for recurrent mails
         await scheduler.reminderMails(invoiceData.id)
+
+        logger.info(`done setting up recurrent mails for ${invoiceData.id}`)
 
         invoiceData.recurrent = true
 
         await invoiceData.save()
     }
+
 }
