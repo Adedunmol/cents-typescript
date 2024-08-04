@@ -19,7 +19,7 @@ const scheduler = {
 
         const interval = `${invoice.frequency} ${invoice.interval}`
         console.log("interval:", interval)
-        await agenda.every(interval.trim(), 'send-reminder-mails', { id: invoiceId })
+        await agenda.every('3 minutes', 'send-reminder-mails', { id: invoiceId })
     }
 }
 
