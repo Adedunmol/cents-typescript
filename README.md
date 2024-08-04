@@ -79,4 +79,4 @@ Project is: _in progress_.
 
 
 ## Contact
-Created by [@Adedunmola](oyewaleadedunmola@gmail.com) - feel free to contact me!
+Created by [Adedunmola](mailto:oyewaleadedunmola@gmail.com) - feel free to contact me!
