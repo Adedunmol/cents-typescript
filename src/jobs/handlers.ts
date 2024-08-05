@@ -1,5 +1,6 @@
 import { Job } from "agenda"
 import { sendReminderMailsHandler } from "./mailHandlers"
+import scheduler from "./scheduler"
 
 const jobHandlers = {
     sendMailOnDueDate: async (job: Job) => { 
@@ -8,6 +9,7 @@ const jobHandlers = {
         const invoiceId = job.attrs.data.id 
 
         await sendReminderMailsHandler(invoiceId)
+        await scheduler.reminderMails(invoiceId)
 
         console.log('job done')
     },

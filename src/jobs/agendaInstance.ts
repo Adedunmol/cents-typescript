@@ -18,8 +18,14 @@ agenda
     await agenda.start()
     logger.info('Agenda has started')
 })
-.on('error', (err) => logger.error('Agenda has not started', err))
-
+.on('error', (err) => { 
+    logger.error('Agenda has not started')
+    logger.error(err)
+})
+.on('fail', (err, job) => {
+    logger.error(`Job ${job.attrs.name} failed with error:`)
+    logger.error(err)
+})
 
 //need to create the definitions(jobs) before
 allDefinitions(agenda)

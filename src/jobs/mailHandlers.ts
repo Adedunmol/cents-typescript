@@ -40,11 +40,6 @@ export const sendReminderMailsHandler = async (invoiceId: string) => {
     })
 
     if (!invoiceData.recurrent) {
-        logger.info(`setting up recurrent mails for ${invoiceData.id}`)
-        // if the current invoice has not been scheduled for recurrent mails
-        await scheduler.reminderMails(invoiceData.id)
-
-        logger.info(`done setting up recurrent mails for ${invoiceData.id}`)
 
         invoiceData.recurrent = true
 

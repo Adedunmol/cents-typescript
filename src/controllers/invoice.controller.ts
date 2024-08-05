@@ -34,7 +34,7 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
         throw new BadRequestError('invalid date structure')
     }
 
-    const formattedDueDate = new Date(Number(splittedDate.year), Number(splittedDate.month) - 1, Number(splittedDate.day), 18, 1)
+    const formattedDueDate = new Date(Number(splittedDate.year), Number(splittedDate.month) - 1, Number(splittedDate.day), 20, 48)
 
     console.log('due date: ', formattedDueDate)
     console.log('current date: ', new Date())
