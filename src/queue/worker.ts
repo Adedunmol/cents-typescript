@@ -2,9 +2,8 @@ import { Worker } from 'bullmq'
 import logger from "../utils/logger"
 import { sendMailWithTemplates } from "../utils/mail";
 import createInvoice from "../utils/generateInvoice";
-import path from "path"
 import fs from "fs"
-import { redisConnOptions, connection } from '.';
+import { connection } from '.';
 
 const emailWorker = new Worker('emails', async job => {
     try {
@@ -38,7 +37,7 @@ const invoiceWorker = new Worker('invoices', async job => {
             await sendMailWithTemplates("invoice", { invoice: invoiceData.invoice, dueDate: invoiceData.dueDate }, invoiceData.invoice.clientEmail, invoiceData.invoicePath, invoiceData.invoice._id)
         }
 
-        fs.unlink(invoiceData.invoicePath, (err: any) => { // path.join(__dirname, '..', 'invoices', `${String(invoiceData.invoice._id)}.pdf`)
+        fs.unlink(invoiceData.invoicePath, (err: any) => {
             if (err) throw new Error(err)
         })
     } catch (err: any) {
