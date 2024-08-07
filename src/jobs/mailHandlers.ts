@@ -13,12 +13,12 @@ export const sendReminderMailsHandler = async (invoiceId: string) => {
     const invoiceData = await Invoice.findOne({ _id: invoiceId }).exec()
 
     if (!invoiceData || invoiceData.fullyPaid) {
-        logger.info('cancelling job due to full payment or invoice not found')
+        logger.info('canceling job due to full payment or invoice not found')
         if (!invoiceData) return;
 
         const job = await agenda.cancel({ 'data.body.id': invoiceData._id })
 
-        console.log('cancelling job')
+        console.log('canceled job')
         return;
     }
 

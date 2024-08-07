@@ -30,6 +30,4 @@ agenda
 //need to create the definitions(jobs) before
 allDefinitions(agenda)
 
-console.log({ jobs: agenda._definitions })
-
 export default agenda;

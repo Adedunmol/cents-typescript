@@ -1,28 +1,29 @@
 import { Job } from "agenda"
 import { sendReminderMailsHandler } from "./mailHandlers"
 import scheduler from "./scheduler"
+import logger from "../utils/logger"
 
 const jobHandlers = {
     sendMailOnDueDate: async (job: Job) => { 
     
-        console.log(`Running at: ${Date()}`)
+        logger.info('Running due date mail')
         const invoiceId = job.attrs.data.id 
 
         await sendReminderMailsHandler(invoiceId)
         await scheduler.reminderMails(invoiceId)
 
-        console.log('job done')
+        console.log('due date mail job done')
     },
 
     sendReminderMails: async (job: Job) => {
 
-        console.log(`Running reminder mail at: ${Date()}`)
+        logger.info('Running reminder mail')
         const invoiceId = job.attrs.data.id
         console.log(`Reminder mail: ${invoiceId}`)
 
         await sendReminderMailsHandler(invoiceId)
 
-        console.log('reminder mail done')
+        console.log('reminder mail job done')
     }
 }
 
