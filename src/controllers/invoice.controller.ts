@@ -1,12 +1,11 @@
 import { Request, Response } from 'express'
-import fs from 'fs'
 import { invoiceInput } from '../schema/invoice.schema'
 import { getClient } from '../service/client.service'
 import { createInvoice, findAndUpdateInvoice, findInvoice, getInvoices } from '../service/invoice.service'
 import { BadRequestError, NotFoundError } from '../errors'
 import { StatusCodes } from 'http-status-codes'
 import path from 'path'
-import { findUserByEmail, findUserById } from '../service/auth.service'
+import { findUserById } from '../service/auth.service'
 import { formatDistance, isBefore } from 'date-fns'
 import { sendToQueue } from '../queue/producer'
 import scheduler from '../jobs/scheduler'
@@ -34,7 +33,7 @@ export const createInvoiceController = async (req: Request<{ id: string }, {}, i
         throw new BadRequestError('invalid date structure')
     }
 
-    const formattedDueDate = new Date(Number(splittedDate.year), Number(splittedDate.month) - 1, Number(splittedDate.day), 22, 40)
+    const formattedDueDate = new Date(Number(splittedDate.year), Number(splittedDate.month) - 1, Number(splittedDate.day))
 
     console.log('due date: ', formattedDueDate)
     console.log('current date: ', new Date())

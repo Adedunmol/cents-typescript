@@ -6,7 +6,6 @@ import generateInvoice from '../utils/generateInvoice'
 import { sendMailWithTemplates } from '../utils/mail'
 import agenda from './agendaInstance'
 import { formatDistance } from 'date-fns'
-import scheduler from './scheduler'
 import logger from '../utils/logger'
 
 
@@ -14,7 +13,7 @@ export const sendReminderMailsHandler = async (invoiceId: string) => {
     const invoiceData = await Invoice.findOne({ _id: invoiceId }).exec()
 
     if (!invoiceData || invoiceData.fullyPaid) {
-
+        logger.info('cancelling job due to full payment or invoice not found')
         if (!invoiceData) return;
 
         const job = await agenda.cancel({ 'data.body.id': invoiceData._id })

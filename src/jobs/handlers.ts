@@ -16,13 +16,13 @@ const jobHandlers = {
 
     sendReminderMails: async (job: Job) => {
 
-        console.log(`Running reminder mails at: ${Date()}`)
+        console.log(`Running reminder mail at: ${Date()}`)
         const invoiceId = job.attrs.data.id
-        console.log(`Reminder mails: ${invoiceId}`)
+        console.log(`Reminder mail: ${invoiceId}`)
 
         await sendReminderMailsHandler(invoiceId)
 
-        console.log('reminder mails done')
+        console.log('reminder mail done')
     }
 }
 
