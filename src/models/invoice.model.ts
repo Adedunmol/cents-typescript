@@ -70,7 +70,7 @@ const invoiceSchema = new Schema({
     interval: {
         type: String,
         required: [true, 'Please provide interval'],
-        enum: ['day', 'week', 'month', 'minutes']
+        enum: ['day', 'week', 'month']
     },
     recurrent: {
         type: Boolean,
